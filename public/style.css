@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+html, body {
+    height: 100vh;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+* {
+    margin:0;
+    font-family: "Nunito", sans-serif;
+    box-sizing: border-box;
+}
+
+.container {
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: cornsilk;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 60%;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+label {
+    width: 100%;
+    display: block;
+}
+
+input {
+    border: 1px solid;
+    width: 100%;
+    border-radius: 5px;
+    padding: 0.3rem;
+    outline: 0;
+}
+
+button {
+    padding: 5px 10px;
+    width: fit-content;
+    border-radius: 5px;
+    border: 0;
+    background-color: crimson;
+    color: white;
+    font-weight: 900;
+    font-size: 20px;
+}
+
+#shortened-urls {
+    list-style-type: none;
+    padding: 0;
+    font-size: 0.9rem;
+    overflow-y: auto;
+    max-height: 10rem;
+}
+
+#shortened-urls li {
+    max-width: 100%;
+    margin-right: 4px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #edc287;
+    margin-bottom: 0.5rem;
+}
+
+#shortened-urls p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;        /* only needed with ellipsis */
+}
+
+/* Chrome, Edge, and Safari */
+ul::-webkit-scrollbar {
+    width: 8px; /* Make it more visible for testing */
+}
+
+ul::-webkit-scrollbar-thumb {
+    background: #e2381a;
+    border-radius: 10px;
+}
+
+ul::-webkit-scrollbar-track {
+    background: #edc287;
+    border-radius: 4px;
+}
+
+@media (max-width: 500px) {
+    .container {
+        width: 95%;
+    }
+}
