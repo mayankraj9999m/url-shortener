@@ -68,18 +68,31 @@ button {
 #shortened-urls li {
     max-width: 100%;
     margin-right: 4px;
-    display: flex;
-    flex-direction: column;
     border-radius: 5px;
     padding: 10px;
     background-color: #edc287;
     margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    & img:hover {
+        filter: saturate(800%);
+        transform: rotate(90deg) scale(1.06);
+        transition: transform 0.3s ease;
+    }
+}
+
+#shortened-urls div {
+    position: relative;
+    overflow-x: auto;
 }
 
 #shortened-urls p {
+    position: relative;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;        /* only needed with ellipsis */
+    /* scrollbar-width: none; */
+    overflow-x: auto;
 }
 
 /* Chrome, Edge, and Safari */
@@ -97,8 +110,26 @@ ul::-webkit-scrollbar-track {
     border-radius: 4px;
 }
 
-@media (max-width: 500px) {
+/* Chrome, Edge, and Safari */
+#shortened-urls p::-webkit-scrollbar {
+    height: 5px; /* Make it more visible for testing */
+}
+
+#shortened-urls p::-webkit-scrollbar-thumb {
+    background: #e2381a;
+    border-radius: 10px;
+}
+
+#shortened-urls p::-webkit-scrollbar-track {
+    background: #edc287;
+    border-radius: 4px;
+}
+
+@media (max-width: 600px) {
     .container {
         width: 95%;
+    }
+    #shortened-urls p::-webkit-scrollbar {
+        height: 0px; /* Make it more visible for testing */
     }
 }

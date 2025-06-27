@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener App</h1>
+        <form action="/" method="post">
+            <div>
+                <label for="url">Enter URL: </label>
+                <input type="url" name="url" id="url" required>
+            </div>
+            <div>
+                <label for="shortCode">Enter Short Code [Optional]: </label>
+                <input type="text" name="shortCode" id="shortCode">
+            </div>
+            <button type="submit">Shorten It </button>
+        </form>
+        
+        <h2>Shortened URLs</h2>
+        <ul id="shortened-urls">
+            <% Object.entries(links).map(([shortCode, url]) => { %>
+                <li>
+                    <div>
+                        <a href="/<%= shortCode %>" target="_blank"><%= host %>/<%= shortCode %></a>
+                        <p><%= url %></p>
+                    </div>
+                    <img width="40" height="40" src="https://img.icons8.com/fluency/48/cancel.png" alt="cancel"/>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+
+    <script>
+        const deleteImages = document.querySelectorAll('#shortened-urls li img');
+        deleteImages.forEach((img, index) => {
+            img.addEventListener('click', () => {
+                // Example: remove the corresponding <li> on click
+                const li = img.closest('li');
+                if (li) {
+                    const url = li.querySelector('li div a').textContent;
+                    const match = url.match(/([^/]+)\/?$/);
+                    const shortCodetoDelete = (match) ? match[1] : null;
+                    fetch(`/delete/${shortCodetoDelete}`, {
+                        method: 'DELETE'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        (data.success) ? location.reload() : alert(data.message);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

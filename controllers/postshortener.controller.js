@@ -1,19 +1,11 @@
 import crypto from 'crypto';
-import { Devs, loadLinks, saveLinks } from '../models/shortener.model.js';
-import { readFile } from 'fs/promises';
+import { deleteLinks, Devs, loadLinks, saveLinks } from '../models/shortener.model.js';
 import path from 'path';
 
 export const getShortenerPage = async (req, res) => {
     try {
-        const PATH_HTML = path.join(import.meta.dirname, "..", "views", "index.html");
-        let file = await readFile(PATH_HTML);
         const links = await loadLinks();
-        file = file.toString().replaceAll("{{Urls go here}}",
-            Object.entries(links).map(([shortCode, url]) => {
-                return `<li><a href="/${shortCode}" target="_blank">${req.host}/${shortCode}</a><p>${url}</p></li>`
-            }).join("")
-        );
-        res.send(file);
+        res.render("index", { links: links, host: req.host })
     } catch (error) {
         console.error(error);
         return res.status(500).send("Internal Server Error");
@@ -32,8 +24,8 @@ export const postURLShortener = async (req, res) => {
             return res.status(400).send("Short Code already exists. Please choose another.");
         }
 
-        links[finalShortCode] = url;
-        await saveLinks(links);
+        await saveLinks(finalShortCode, url);
+
         res.send(`<script>
             alert('Form submitted successfully!');
             window.location.href = '/'; // redirect to homepage (or any page)
@@ -48,14 +40,29 @@ export const redirectToShortLink = async (req, res) => {
     try {
         const links = await loadLinks();
         const { shortCode } = req.params;
-        if (!links[shortCode]) return res.status(404).send("Error 404 : Shortened URL not found.");
-        return res.status(302).redirect(links[shortCode]);
+        if (!links[shortCode]) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
+        console.log(links[shortCode]);
+        return res.redirect(302,links[shortCode]);
     } catch (error) {
         console.error(error);
-        return res.status(500).send("Internal Server Error")
+        return res.status(500).send("Internal Server Error");
     }
 };
 
 export const getEJSDeveloperPage = (req, res) => {
-    res.render("report", { Devs });
+    res.render("devpage", { Devs });
+};
+
+export const deleteShortCode = async (req, res) => {
+    const shortCode = req.params.id;
+    const resFromDB = await deleteLinks(shortCode);
+    if (resFromDB) {
+        res.status(200).json({ success: true, message: `Deleted Short Code: ${shortCode}` });
+    } else {
+        res.status(400).json({ success: false, message: `Failed to delete short code: ${shortCode}` });
+    };
+};
+
+export const handleError = (req, res) => {
+    res.send("")
 }
