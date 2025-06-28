@@ -5,15 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developers</title>
+    <link rel="stylesheet" href="./devpage.css">
 </head>
 
 <body>
     <%- include("header") %>
-    <h1>Shortened URL Developers</h1>
-    <% Devs.map((item) => { %>
-        <p><b>Name : </b><%= item.Name %></p>
-        <p><b>Skills : </b><%= item.Skills %></p>
-    <% }) %>
+    <div class="devs">
+        <h1>Shortened URL Developers</h1>
+        <% Devs.map((item) => { %>
+            <div class="card">
+                <img src="https://avatars.githubusercontent.com/u/201279422?v=4"/>
+                <div class="details">
+                    <p><b>Name : </b><%= item.Name %></p>
+                    <p><b>Skills : </b><%= item.Skills %></p>
+                </div>
+            </div>
+        <% }) %>
+    </div>
 </body>
 
 </html>

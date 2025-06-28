@@ -46,7 +46,7 @@
                     const match = url.match(/([^/]+)\/?$/);
                     const shortCodetoDelete = (match) ? match[1] : null;
                     fetch(`/delete/${shortCodetoDelete}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
                     })
                     .then(res => res.json())
                     .then(data => {

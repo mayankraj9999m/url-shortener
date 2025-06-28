@@ -16,7 +16,7 @@ export const loadLinks = async () => {
 export const saveLinks = async (shortCode, url) => {
     try {
         await shortColn.updateOne({}, { $set: { [shortCode]: url } });
-        console.log('URL Short code created.');
+        console.log(`URL Short code : ${shortCode} created.`);
     } catch (error) {
         console.log(error);
     }
@@ -24,8 +24,10 @@ export const saveLinks = async (shortCode, url) => {
 
 export const deleteLinks = async (shortCode) => {
     try {
-        await shortColn.updateOne({}, {$unset : {[shortCode] : 1}});
-        return true;
+        const del_res = await shortColn.updateOne({}, {$unset : {[shortCode] : 1}});
+        if (del_res.modifiedCount)
+            return true;
+        throw new Error("Delete Error : short code not found")
     } catch (error) {
         console.error(error);
         return false;

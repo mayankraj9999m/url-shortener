@@ -8,7 +8,7 @@ export const getShortenerPage = async (req, res) => {
         res.render("index", { links: links, host: req.host })
     } catch (error) {
         console.error(error);
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
     }
 }
 
@@ -33,6 +33,7 @@ export const postURLShortener = async (req, res) => {
         `);
     } catch (error) {
         console.log(error);
+        return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
     }
 };
 
@@ -41,11 +42,11 @@ export const redirectToShortLink = async (req, res) => {
         const links = await loadLinks();
         const { shortCode } = req.params;
         if (!links[shortCode]) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
-        console.log(links[shortCode]);
+        console.log(`Redirected to : ${links[shortCode]}`);
         return res.redirect(302,links[shortCode]);
     } catch (error) {
         console.error(error);
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
     }
 };
 
@@ -57,12 +58,10 @@ export const deleteShortCode = async (req, res) => {
     const shortCode = req.params.id;
     const resFromDB = await deleteLinks(shortCode);
     if (resFromDB) {
-        res.status(200).json({ success: true, message: `Deleted Short Code: ${shortCode}` });
+        const response = { success: true, message: `Deleted Short Code: ${shortCode}` };
+        res.status(200).json(response);
     } else {
-        res.status(400).json({ success: false, message: `Failed to delete short code: ${shortCode}` });
+        const response = { success: false, message: `Failed to delete short code: ${shortCode}` };
+        res.status(400).json(response);
     };
 };
-
-export const handleError = (req, res) => {
-    res.send("")
-}
