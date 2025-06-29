@@ -23,7 +23,7 @@
         
         <h2>Shortened URLs</h2>
         <ul id="shortened-urls">
-            <% Object.entries(links).map(([shortCode, url]) => { %>
+            <% links.map(({shortCode, url}) => { %>
                 <li>
                     <div>
                         <a href="/<%= shortCode %>" target="_blank"><%= host %>/<%= shortCode %></a>

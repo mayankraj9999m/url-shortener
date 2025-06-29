@@ -3,19 +3,17 @@ import { dbClient } from "../config/db-client.js";
 const db = dbClient.db(process.env.MONGODB_DATABASE_NAME);
 const shortColn = db.collection('shortLinks');
 
-export const loadLinks = async () => {
-    const res = await shortColn.find().toArray();
+export const loadLinks = async (query) => {
+    const res = await shortColn.find(query).toArray();
     if (res.length === 0) {
-        await shortColn.insertOne({});
-        return {};
+        return [];
     }
-    delete res[0]._id;
-    return res[0];
+    return res;
 }
 
 export const saveLinks = async (shortCode, url) => {
     try {
-        await shortColn.updateOne({}, { $set: { [shortCode]: url } });
+        await shortColn.insertOne({shortCode, url});
         console.log(`URL Short code : ${shortCode} created.`);
     } catch (error) {
         console.log(error);
@@ -24,10 +22,11 @@ export const saveLinks = async (shortCode, url) => {
 
 export const deleteLinks = async (shortCode) => {
     try {
-        const del_res = await shortColn.updateOne({}, {$unset : {[shortCode] : 1}});
-        if (del_res.modifiedCount)
+        // const del_res = await shortColn.updateOne({}, {$unset : {[shortCode] : 1}});
+        const del_res = await shortColn.deleteOne({shortCode});
+        if (del_res.deletedCount)
             return true;
-        throw new Error("Delete Error : short code not found")
+        throw new Error("Delete Error : short code not found");
     } catch (error) {
         console.error(error);
         return false;
