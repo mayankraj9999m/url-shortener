@@ -1,11 +1,10 @@
 import crypto from 'crypto';
-import { deleteLinks, Devs, loadLinks, saveLinks } from '../models/shortener.model.js';
+import { deleteLinks, Devs, loadLinks, saveLinks } from '../services/shortener.services.js';
 import path from 'path';
 
 export const getShortenerPage = async (req, res) => {
     try {
-        const query = 'SELECT * FROM short_links';
-        const links = await loadLinks(query);
+        const links = await loadLinks();
         res.render("index", { links: links, host: req.host })
     } catch (error) {
         console.error(error);
@@ -17,13 +16,11 @@ export const postURLShortener = async (req, res) => {
     try {
         //* Getting links.json data
         const { url, shortCode } = req.body;
-        const query = 'SELECT * FROM short_links WHERE short_code = ?';
-        const params = [shortCode];
-        const links = await loadLinks(query, params);
+        const links = await loadLinks(shortCode);
 
         const finalShortCode = shortCode || crypto.randomBytes(4).toString('hex');
 
-        if (links.length) {
+        if (links) {
             return res.status(400).send("Short Code already exists. Please choose another.");
         }
 
@@ -43,9 +40,7 @@ export const postURLShortener = async (req, res) => {
 export const redirectToShortLink = async (req, res) => {
     try {
         const { shortCode } = req.params;
-        const query = 'SELECT url from short_links where short_code=?';
-        const params = [shortCode];
-        const [links] = await loadLinks(query, params);
+        const links = await loadLinks(shortCode);
         if (!links) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
         console.log(`Redirected to : ${links.shortCode}`);
         return res.redirect(302, links.url);
