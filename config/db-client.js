@@ -1,15 +1,21 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-// Validate MongoDB URI format
-if (!/^mongodb(?:\+srv)?:\/\/(?!\/).*$/gm.test(process.env.MONGODB_URI)) {
-    console.error('❌ MongoDB Connection Error');
-    console.error('━'.repeat(80));
-    console.error(`🔗 Invalid URI: ${process.env.MONGODB_URI}`);
-    console.error('📋 Expected format:');
-    console.error('   • mongodb://username:password@host:port/database');
-    console.error('   • mongodb+srv://username:password@cluster.mongodb.net/database');
-    console.error('━'.repeat(80));
+const {
+    MONGODB_USERNAME,
+    MONGODB_PASSWORD,
+    MONGODB_CLUSTER,
+    MONGODB_DATABASE,
+    MONGODB_OPTIONS
+} = process.env;
+
+const encodedPassword = encodeURIComponent(MONGODB_PASSWORD);
+
+const uri = `mongodb+srv://${MONGODB_USERNAME}:${encodedPassword}@${MONGODB_CLUSTER}/${MONGODB_DATABASE}${MONGODB_OPTIONS}`;
+
+try {
+    await mongoose.connect(uri);
+    console.log("✅ MongoDB connected successfully");
+} catch (error) {
+    console.error("❌ MongoDB connection error:", error);
     process.exit(1);
 }
-
-export const dbClient = new MongoClient(process.env.MONGODB_URI);

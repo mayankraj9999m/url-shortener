@@ -1,10 +1,17 @@
-import { dbClient } from "../config/db-client.js";
+import "../config/db-client.js";
+import mongoose from "mongoose";
 
-const db = dbClient.db(process.env.MONGODB_DATABASE_NAME);
-const shortColn = db.collection('shortLinks');
+// Step 2 : Create Schema
+const shortURLSchema = mongoose.Schema({
+    shortCode: { type: String, required: true, unique: true },
+    url: { type: String, required: true },
+});
+
+// Step 3 : Creating a model
+const shortColn = mongoose.model("shortLink", shortURLSchema, "shortLinks");
 
 export const loadLinks = async (query) => {
-    const res = await shortColn.find(query).toArray();
+    const res = await shortColn.find(query);
     if (res.length === 0) {
         return [];
     }
@@ -13,7 +20,7 @@ export const loadLinks = async (query) => {
 
 export const saveLinks = async (shortCode, url) => {
     try {
-        await shortColn.insertOne({shortCode, url});
+        await shortColn.create({shortCode, url});
         console.log(`URL Short code : ${shortCode} created.`);
     } catch (error) {
         console.log(error);
