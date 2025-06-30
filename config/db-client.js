@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { env } from "./env.js";
 
 const {
     MONGODB_USERNAME,
@@ -6,7 +7,7 @@ const {
     MONGODB_CLUSTER,
     MONGODB_DATABASE,
     MONGODB_OPTIONS
-} = process.env;
+} = env;
 
 const encodedPassword = encodeURIComponent(MONGODB_PASSWORD);
 
