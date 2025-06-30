@@ -23,10 +23,10 @@
         
         <h2>Shortened URLs</h2>
         <ul id="shortened-urls">
-            <% links.map(({shortCode, url}) => { %>
+            <% links.map(({short_code, url}) => { %>
                 <li>
                     <div>
-                        <a href="/<%= shortCode %>" target="_blank"><%= host %>/<%= shortCode %></a>
+                        <a href="/<%= short_code %>" target="_blank"><%= host %>/<%= short_code %></a>
                         <p><%= url %></p>
                     </div>
                     <img width="40" height="40" src="https://img.icons8.com/fluency/48/cancel.png" alt="cancel"/>

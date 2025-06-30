@@ -1,44 +1,36 @@
-import "../config/db-client.js";
-import mongoose from "mongoose";
+import { db } from "../config/db-client.js";
 
-// Step 2 : Create Schema
-const shortURLSchema = mongoose.Schema({
-    shortCode: { type: String, required: true, unique: true },
-    url: { type: String, required: true },
-});
-
-// Step 3 : Creating a model
-const shortColn = mongoose.model("shortLink", shortURLSchema, "shortLinks");
-
-export const loadLinks = async (query) => {
-    const res = await shortColn.find(query);
-    if (res.length === 0) {
+export const loadLinks = async (query, params = []) => {
+    const [res] = await db.execute(query, params);
+    if (!res || res.length === 0) {
         return [];
     }
     return res;
-}
+};
 
 export const saveLinks = async (shortCode, url) => {
     try {
-        await shortColn.create({shortCode, url});
+        await db.execute(`
+            INSERT INTO short_links(short_code, url) VALUES (?, ?)`, [shortCode, url]
+        );
         console.log(`URL Short code : ${shortCode} created.`);
     } catch (error) {
         console.log(error);
     }
-}
+};
 
 export const deleteLinks = async (shortCode) => {
     try {
         // const del_res = await shortColn.updateOne({}, {$unset : {[shortCode] : 1}});
-        const del_res = await shortColn.deleteOne({shortCode});
-        if (del_res.deletedCount)
+        const [del_res] = await db.execute(`DELETE FROM short_links WHERE short_code=?`, [shortCode]);
+        if (del_res.affectedRows > 0)
             return true;
         throw new Error("Delete Error : short code not found");
     } catch (error) {
         console.error(error);
         return false;
     }
-}
+};
 
 export const Devs = [
     {

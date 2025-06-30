@@ -4,7 +4,7 @@ import path from 'path';
 
 export const getShortenerPage = async (req, res) => {
     try {
-        const query = {};
+        const query = 'SELECT * FROM short_links';
         const links = await loadLinks(query);
         res.render("index", { links: links, host: req.host })
     } catch (error) {
@@ -17,8 +17,9 @@ export const postURLShortener = async (req, res) => {
     try {
         //* Getting links.json data
         const { url, shortCode } = req.body;
-        const query = {shortCode: shortCode};
-        const links = await loadLinks(query);
+        const query = 'SELECT * FROM short_links WHERE short_code = ?';
+        const params = [shortCode];
+        const links = await loadLinks(query, params);
 
         const finalShortCode = shortCode || crypto.randomBytes(4).toString('hex');
 
@@ -42,11 +43,12 @@ export const postURLShortener = async (req, res) => {
 export const redirectToShortLink = async (req, res) => {
     try {
         const { shortCode } = req.params;
-        const query = {shortCode: shortCode}
-        const [links] = await loadLinks(query);
+        const query = 'SELECT url from short_links where short_code=?';
+        const params = [shortCode];
+        const [links] = await loadLinks(query, params);
         if (!links) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
         console.log(`Redirected to : ${links.shortCode}`);
-        return res.redirect(302,links.url);
+        return res.redirect(302, links.url);
     } catch (error) {
         console.error(error);
         return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
