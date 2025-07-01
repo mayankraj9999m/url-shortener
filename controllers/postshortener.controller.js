@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { deleteLinks, Devs, loadLinks, saveLinks } from '../services/shortener.services.js';
+import { deleteLinks, Devs, loadLinks, saveLinks } from '../models/shortener.model.js';
 import path from 'path';
 
 export const getShortenerPage = async (req, res) => {
@@ -16,7 +16,7 @@ export const postURLShortener = async (req, res) => {
     try {
         //* Getting links.json data
         const { url, shortCode } = req.body;
-        const links = await loadLinks(shortCode);
+        const [links] = await loadLinks(shortCode);
 
         const finalShortCode = shortCode || crypto.randomBytes(4).toString('hex');
 
@@ -40,7 +40,7 @@ export const postURLShortener = async (req, res) => {
 export const redirectToShortLink = async (req, res) => {
     try {
         const { shortCode } = req.params;
-        const links = await loadLinks(shortCode);
+        const [links] = await loadLinks(shortCode);
         if (!links) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
         console.log(`Redirected to : ${links.shortCode}`);
         return res.redirect(302, links.url);

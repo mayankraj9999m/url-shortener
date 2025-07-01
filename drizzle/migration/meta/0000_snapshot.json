@@ -1,0 +1,63 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "90652a80-a1a1-453f-9edc-66c8491b3443",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "short_links_table": {
+      "name": "short_links_table",
+      "columns": {
+        "SERIAL NO.": {
+          "name": "SERIAL NO.",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "URL": {
+          "name": "URL",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "SHORT_CODE": {
+          "name": "SHORT_CODE",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "short_links_table_SERIAL NO.": {
+          "name": "short_links_table_SERIAL NO.",
+          "columns": [
+            "SERIAL NO."
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "short_links_table_SHORT_CODE_unique": {
+          "name": "short_links_table_SHORT_CODE_unique",
+          "columns": [
+            "SHORT_CODE"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    }
+  },
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}
