@@ -37,24 +37,52 @@
             
             <h2>Shortened URLs</h2>
             <ul id="shortened-urls">
-                <% links.map(({shortCode, url}) => { %>
-                    <li>
-                        <div class="link-ctr">
-                            <div class="link">
-                                <img src="./Images/link.svg" alt="link"/>
-                                <a href="/<%= shortCode %>" target="_blank" class="short-code-link"><%= host %>/<%= shortCode %></a>
+                <% if(links.length>0) { %>
+                    <% links.map(({id, shortCode, url}) => { %>
+                        <li data-id="<%= id %>">
+                            <div class="link-ctr">
+                                <div class="link">
+                                    <img src="./Images/link.svg" alt="link"/>
+                                    <a href="/<%= shortCode %>" target="_blank" class="short-code-link"><%= host %>/<%= shortCode %></a>
+                                </div>
+                                <p><%= url %></p>
                             </div>
-                            <p><%= url %></p>
-                        </div>
-                        <img src="https://img.icons8.com/fluency/48/cancel.png" alt="cancel"/>
+                            <div class="controls">
+                                <img src="./Images/edit.svg" alt="edit" class="edit" data-id="edit"/>
+                                <img src="./Images/delete.svg" alt="cancel" data-id="delete"/>
+                            </div>
+                            <div class="filter-bg">
+                                <div class="filter-popup">
+                                    <div class="filter">
+                                        <label style="font-weight: bold; font-size: 1.2rem">Update Details for ID: <%=id%></label>
+                                        <form data-id="update-box">
+                                            <div>
+                                                <label for="url-<%= id %>">Enter URL: </label>
+                                                <input type="text" name="url" id="url-<%= id %>" value=<%= url %> required>
+                                            </div>
+                                            <div>
+                                                <label for="shortCode-<%= id %>">Enter Short Code [Optional]: </label>
+                                                <input type="text" name="shortCode" id="shortCode-<%= id %>" value=<%= shortCode%>>
+                                            </div>
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    <% }) %>
+                <% } else { %>
+                    <li>
+                        <div class="link-ctr">No shortcodes to show.</div>
                     </li>
-                <% }) %>
+                <% } %>
             </ul>
         </div>
     </main>
 
     <script>
-        const deleteImages = document.querySelectorAll('#shortened-urls li img');
+        //! delete shortcode
+        const deleteImages = document.querySelectorAll("[data-id='delete']");
         deleteImages.forEach((img, index) => {
             img.addEventListener('click', () => {
                 // Example: remove the corresponding <li> on click
@@ -74,13 +102,93 @@
             });
         });
 
-        // Setting height of list
+        //! edit shortcodes, urls
+        const editShortCodes = document.querySelectorAll("[data-id='edit']");  // Edit buttons
+        editShortCodes.forEach((img, index) => {
+            img.addEventListener('click', () => {
+                const li = img.closest('li');
+                const ID = li.dataset.id;
+                const filterBg = li.querySelector(".filter-bg");
+                const filterPopUp = li.querySelector(".filter-popup");
+                const filter = li.querySelector(".filter");
+                filterBg.classList.remove("inactive");
+                filterPopUp.classList.remove("inactive");
+                filter.classList.remove("inactive");
+                filterBg.classList.add("active");
+                filterPopUp.classList.add("active");
+                filter.classList.add("active");
+                filterBg.addEventListener("click", (e) => {
+                    if (e.target["classList"][0] === "filter-bg") {
+                        filterBg.classList.remove("active");
+                        filterPopUp.classList.remove("active");
+                        filterBg.classList.add("inactive");
+                        filterPopUp.classList.add("inactive");
+                        filter.classList.add("inactive");
+                        filter.classList.remove("active");
+                    }
+                });
+                const updateForm = li.querySelector('[data-id="update-box"]');
+                updateForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await edit(ID, updateForm, li);
+                })
+            });
+        });
+
+        // Fetch API for edit
+        const edit = async (id, form, li) => {
+            // Web APIs
+            // const formData = new FormData(form, submitter);
+            const formData = new FormData(form);
+            const url = formData.get('url');
+            const shortCode = formData.get('shortCode');
+            console.log(url, shortCode);
+
+            // Hitting API
+            try {
+                const response = await fetch(`/edit/${id}`, {
+                    method : "PATCH",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({url, shortCode})
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // alert('Successfully updated');
+                    window.location.href = data.redirectTo;
+                } else {
+                    // Remove existing alerts
+                    document.querySelectorAll(".alert").forEach(el => el.remove());
+
+                    const submit_btn = li.querySelector('button[type="submit"]');
+                    //! Creating alert message
+                    const errorContainer = document.createElement("p");
+                    errorContainer.className = "alert";
+
+                    const errorStatus = response.statusText;
+                    if (response.status === 409) {
+                        errorContainer.innerHTML = `${errorStatus} : ${data.error}`;
+                        // Append the alert above the register button
+                        submit_btn.before(errorContainer);
+                    } else
+                        alert(errorStatus);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        //! Setting height of list
         const li = document.querySelectorAll("#shortened-urls li");
         const height = li[0].clientHeight;
         const list_ul = document.getElementById('shortened-urls');
-        list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+8}px`;
-
-
+        list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+10}px`;
+        window.addEventListener("resize",(e) => {
+            const li = document.querySelectorAll("#shortened-urls li");
+            const height = li[0].clientHeight;
+            console.log(height);
+            list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+10}px`;
+        });
     </script>
 </body>
 </html>

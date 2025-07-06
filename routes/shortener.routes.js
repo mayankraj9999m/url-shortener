@@ -1,5 +1,12 @@
 import express from 'express';
-import { postURLShortener, getShortenerPage, redirectToShortLink, getEJSDeveloperPage, deleteShortCode } from '../controllers/postshortener.controller.js';
+import {
+    postURLShortener,
+    getShortenerPage,
+    redirectToShortLink,
+    getEJSDeveloperPage,
+    deleteShortCode,
+    editShortLink
+} from '../controllers/postshortener.controller.js';
 
 // Lecture 52 : Express Router
 const router = express.Router();
@@ -11,6 +18,8 @@ router.post("/", postURLShortener);
 router.get("/dev", getEJSDeveloperPage);
 
 router.get("/:shortCode", redirectToShortLink);
+
+router.patch("/edit/:id", editShortLink);
 
 router.delete('/delete/:id', deleteShortCode);
 

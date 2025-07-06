@@ -1,9 +1,11 @@
 import crypto from 'crypto';
-import {deleteLinks, Devs, loadLinks, saveLinks} from '../models/shortener.model.js';
+import {deleteLinks, Devs, editShortLinkDatabase, loadLinks, saveLinks} from '../models/shortener.model.js';
 import path from 'path';
 import {shortCodeSchema} from "../validators/shortcode-validator.js";
+import z from "zod";
 
 export const getShortenerPage = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
     try {
         if (!req.user) return res.redirect("/login");
         const links = await loadLinks(req.user.id);
@@ -26,7 +28,7 @@ export const getShortenerPage = async (req, res) => {
         //? console.log('Status(Logged IN) : ', isLoggedIn);
         //? console.log('Status(Is HUMAN) : ', userName);
 
-        res.render("index", {links: links, host: req.host, errors: req.flash("errors")});
+        res.render("index", {links: links, host: req.host, errors: req.flash("errors"), errors1: req.flash("errors1")});
     } catch (error) {
         console.error(error);
         return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
@@ -69,6 +71,7 @@ export const postURLShortener = async (req, res) => {
 };
 
 export const redirectToShortLink = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
     try {
         const {shortCode} = req.params;
         const [links] = await loadLinks(req.user.id, shortCode);
@@ -86,6 +89,7 @@ export const getEJSDeveloperPage = (req, res) => {
 };
 
 export const deleteShortCode = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
     const shortCode = req.params.id;
     const resFromDB = await deleteLinks(shortCode);
     if (resFromDB) {
@@ -96,3 +100,29 @@ export const deleteShortCode = async (req, res) => {
         res.status(401).json(response);
     }
 };
+
+export const editShortLink = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
+
+    // Validating id
+    const { data: id, error } = z.coerce.number().int().safeParse(req.params.id);
+    if (error) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
+
+    const {url, shortCode} = req.body;
+
+    //! Using Zod Validation
+    const { data, error: validationError } = shortCodeSchema.safeParse(req.body);
+
+    if (validationError) {
+        const errors = validationError.errors.reduce((acc, e, i) => acc + `${i+1}) ` + e.message + "<br>", '');
+        return res.status(409).json({success: false, redirectTo: "/", error: errors});
+    }
+    try {
+        const resp = await editShortLinkDatabase(id, url, shortCode, req.user.id);
+        if (!resp) return res.status(409).json({success: false, redirectTo: "/", error: "Can't update short code"});
+        return res.status(200).json({success: true, redirectTo: "/"});
+    } catch (err) {
+        console.error(err);
+        return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
+    }
+}

@@ -48,3 +48,14 @@ export const Devs = [
         Skills: "Node.js/ Express.js"
     },
 ];
+
+export const editShortLinkDatabase = async (id, url, shortCode, userId) => {
+    return (await db.update(short_link)
+        .set({url: url, shortCode: shortCode})
+        .where(and(
+                eq(short_link.id, id),
+                eq(short_link.userId, userId)
+            )
+        )
+    )
+};
