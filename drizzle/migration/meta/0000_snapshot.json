@@ -1,49 +1,73 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "90652a80-a1a1-453f-9edc-66c8491b3443",
+  "id": "d4d1fccb-2063-4864-aac6-2414582dd463",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "short_links_table": {
-      "name": "short_links_table",
+    "users": {
+      "name": "users",
       "columns": {
-        "SERIAL NO.": {
-          "name": "SERIAL NO.",
+        "id": {
+          "name": "id",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true
         },
-        "URL": {
-          "name": "URL",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "SHORT_CODE": {
-          "name": "SHORT_CODE",
-          "type": "varchar(20)",
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "short_links_table_SERIAL NO.": {
-          "name": "short_links_table_SERIAL NO.",
+        "users_id": {
+          "name": "users_id",
           "columns": [
-            "SERIAL NO."
+            "id"
           ]
         }
       },
       "uniqueConstraints": {
-        "short_links_table_SHORT_CODE_unique": {
-          "name": "short_links_table_SHORT_CODE_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "columns": [
-            "SHORT_CODE"
+            "email"
           ]
         }
       },

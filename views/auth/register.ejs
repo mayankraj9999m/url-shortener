@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="./register.css">
+</head>
+
+<body>
+<%- include('../partials/header') %>
+<main>
+    <div class="signup-page">
+        <h1>Register</h1>
+        <a href="/login">Have an account?</a>
+        <div class="register-ctr">
+            <figure>
+                <img src="./Images/signup-image.jpg" alt="sign up image"/>
+            </figure>
+            <form class="signup-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your Name" autocomplete="off"/>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Your Email" autocomplete="off"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" autocomplete="off"/>
+                </div>
+                <!--<# if (errors && errors.length > 0) { %>-->
+                <!--    <# errors.forEach((error) => { %>-->
+                <!--        <p class="alert"><#= error %></p>-->
+                <!--    <# }); %>-->
+                <!--<# } %>-->
+                <button class="button-29" type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+</main>
+<script>
+    const form = document.querySelector(".signup-form");
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        // Web APIs
+        // const formData = new FormData(form, submitter);
+        const formData = new FormData(event.target);
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        // Hitting API
+        try {
+            const response = await fetch('/register', {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name, email, password})
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Account Created.\nRedirecting to Login Page');
+                window.location.href = data.redirectTo;
+            } else {
+                // Remove existing alerts
+                document.querySelectorAll(".alert").forEach(el => el.remove());
+
+                const submit_btn = document.querySelector('button[type="submit"]');
+                //! Creating alert message
+                const errorContainer = document.createElement("p");
+                errorContainer.className = "alert";
+
+                const errorStatus = response.statusText;
+                if (response.status === 409) {
+                    errorContainer.innerHTML = `${errorStatus} : ${data.error}`;
+                    // Append the alert above the register button
+                    submit_btn.before(errorContainer);
+                } else
+                    alert(errorStatus);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    })
+</script>
+</body>
+
+</html>

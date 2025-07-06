@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="./login.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <main>
+        <div class="signin-page">
+            <h1>Login</h1>
+            <a href="/register">Don't have an account?</a>
+            <div class="login-ctr">
+                <figure>
+                    <img src="images/signin-image.jpg" alt="sign in image" />
+                </figure>
+                <form class="signin-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="text" id="email" name="email" placeholder="Your Email" autocomplete="off" />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Password" autocomplete="off" />
+                    </div>
+                    <button class="button-29" type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        const form = document.querySelector(".signin-form");
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            // Web APIs
+            // const formData = new FormData(form, submitter);
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+
+            // Hitting API
+            try {
+                const response = await fetch('/login', {
+                    method : "POST",
+                    headers : {"Content-Type" : "application/json"},
+                    body : JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Login successful');
+                    window.location.href = data.redirectTo;
+                }
+                else {
+                    // Remove existing alerts
+                    document.querySelectorAll(".alert").forEach(el => el.remove());
+
+                    const submit_btn = document.querySelector('button[type="submit"]');
+                    //! Creating alert message
+                    const errorContainer = document.createElement("p");
+                    errorContainer.className = "alert";
+
+                    const errorStatus = response.statusText;
+                    const errorMessage = data.error;
+
+                    if (response.status === 401) {
+                        errorContainer.innerHTML = `${errorStatus} : ${errorMessage}`;
+                        // Append the alert above the login button
+                        submit_btn.before(errorContainer);
+                    } else
+                        alert(errorStatus);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        })
+    </script>
+</body>
+</html>

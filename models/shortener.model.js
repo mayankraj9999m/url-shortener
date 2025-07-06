@@ -1,20 +1,28 @@
-import { eq } from "drizzle-orm";
-import { db } from "../config/db.js";
-import { short_link } from "../drizzle/schema.js";
+import {and, eq} from "drizzle-orm";
+import {db} from "../config/db.js";
+import {short_link} from "../drizzle/schema.js";
 
-export const loadLinks = async (shortCode = null) => {
+export const loadLinks = async (userId, shortCode = null) => {
     let res;
-    (!shortCode) ? res = await db.select().from(short_link) : res = await db.select().from(short_link).where(eq(short_link.shortCode, shortCode));
-    if (!res || res.length === 0) {
-        return [];
+
+    if (shortCode) {
+        res = await db.select().from(short_link).where(
+            and(
+                eq(short_link.shortCode, shortCode),
+                eq(short_link.userId, userId)
+            )
+        );
+    } else {
+        res = await db.select().from(short_link).where(eq(short_link.userId, userId));
     }
-    return res;
+
+    return res?.length ? res : [];
 };
 
-export const saveLinks = async (shortCode, url) => {
+export const saveLinks = async (shortCode, url, userId) => {
     try {
         await db.insert(short_link).values({
-            url, shortCode
+            url, shortCode, userId
         })
         console.log(`URL Short code : ${shortCode} created.`);
     } catch (error) {

@@ -1,28 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
-
+/* Basic Reset */
 * {
-    margin: 0;
-    font-family: "Nunito", sans-serif;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.nav-bar {
-    width: 100%;
-    background-color: black;
-    display: flex;
-    gap: 5rem;
-    padding: 15px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-    position: sticky;
-    top: 0;
+/* Navbar Styles */
+.navbar {
+  background-color: #333;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0px;
 }
 
-.nav-bar a {
-    color: white;
-    text-decoration: none;
-    background-color: rgba(255, 255, 255, 0.297);
-    padding: 10px 20px;
-    border-radius: 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
+.navbar-links {
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+}
+
+.navbar-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.navbar-links li a:hover {
+  color: #ffcc00;
+}
+
+/* Responsive for small screens */
+@media (max-width: 768px) {
+  .navbar-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .navbar {
+    padding: 1rem;
+  }
 }

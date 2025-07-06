@@ -4,36 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Shortener App</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>URL Shortener App</h1>
-        <form action="/" method="post">
-            <div>
-                <label for="url">Enter URL: </label>
-                <input type="url" name="url" id="url" required>
+    <%- include('./partials/header') %>
+    <!--    <% if(username) { %>-->
+    <!--        <h2>Welcome, <%= username %></h2>-->
+    <!--    <% } else { %>-->
+    <!--        <h2>Please Log in.</h2>-->
+    <!--    <% } %>-->
+    <main>
+        <div class="container">
+            <div class="status" style="background-color: <%= (username ? "#d6fcc0" : "#fcc0c0") %>">
+                <img src="./Images/<%= (username ? "logged" : "notlogged") %>.svg" alt=`<%= (username ? "logged" : "notlogged") %>`/>
+                <p>You are <%= (username ? "" : "not ") %>logged in</p>
             </div>
-            <div>
-                <label for="shortCode">Enter Short Code [Optional]: </label>
-                <input type="text" name="shortCode" id="shortCode">
-            </div>
-            <button type="submit">Shorten It </button>
-        </form>
-        
-        <h2>Shortened URLs</h2>
-        <ul id="shortened-urls">
-            <% links.map(({shortCode, url}) => { %>
-                <li>
-                    <div>
-                        <a href="/<%= shortCode %>" target="_blank"><%= host %>/<%= shortCode %></a>
-                        <p><%= url %></p>
-                    </div>
-                    <img width="40" height="40" src="https://img.icons8.com/fluency/48/cancel.png" alt="cancel"/>
-                </li>
-            <% }) %>
-        </ul>
-    </div>
+            <h1>URL Shortener App</h1>
+            <form action="/" method="post">
+                <div>
+                    <label for="url">Enter URL: </label>
+                    <input type="text" name="url" id="url" required>
+                </div>
+                <div>
+                    <label for="shortCode">Enter Short Code [Optional]: </label>
+                    <input type="text" name="shortCode" id="shortCode">
+                </div>
+                <% if (errors && errors.length>0) { %>
+                    <p class="alert"><%- errors[0] %></p>
+                <% } %>
+                <button type="submit">Shorten It </button>
+            </form>
+            
+            <h2>Shortened URLs</h2>
+            <ul id="shortened-urls">
+                <% links.map(({shortCode, url}) => { %>
+                    <li>
+                        <div class="link-ctr">
+                            <div class="link">
+                                <img src="./Images/link.svg" alt="link"/>
+                                <a href="/<%= shortCode %>" target="_blank" class="short-code-link"><%= host %>/<%= shortCode %></a>
+                            </div>
+                            <p><%= url %></p>
+                        </div>
+                        <img src="https://img.icons8.com/fluency/48/cancel.png" alt="cancel"/>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
+    </main>
 
     <script>
         const deleteImages = document.querySelectorAll('#shortened-urls li img');
@@ -55,6 +73,14 @@
                 }
             });
         });
+
+        // Setting height of list
+        const li = document.querySelectorAll("#shortened-urls li");
+        const height = li[0].clientHeight;
+        const list_ul = document.getElementById('shortened-urls');
+        list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+8}px`;
+
+
     </script>
 </body>
 </html>
