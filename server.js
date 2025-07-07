@@ -1,11 +1,13 @@
+import cookieParser from "cookie-parser";
 import express from "express";
+import flash from "connect-flash";
 import path from 'path';
+import requestIp from "request-ip";
+import session from "express-session";
+
 import {shortenerRoutes} from "./routes/shortener.routes.js";
 import {authRoutes} from "./routes/auth.routes.js";
-import cookieParser from "cookie-parser";
 import {verifyAuthentication} from "./middlewares/verify.middleware.js";
-import session from "express-session";
-import flash from "connect-flash";
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use(session({
 }));
 
 app.use(flash());
+
+app.use(requestIp.mw()); //! Helps in getting IP using req.clientIP;
 
 //* Verify JWT Token Middleware
 app.use(verifyAuthentication);

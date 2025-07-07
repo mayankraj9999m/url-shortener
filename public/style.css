@@ -307,6 +307,17 @@ label {
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
 }
 
+/*!-----------------------MEDIA QUERIES-------------------------*/
+@media (max-width: 420px) {
+    .filter {
+        width: 100%;
+        margin: 0;
+    }
+    .filter-popup {
+        width: 90%;
+    }
+}
+
 /*!*apply button*!*/
 /*.filter button {*/
 /*    border: 0;*/
