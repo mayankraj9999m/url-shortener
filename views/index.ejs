@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./Images/download.png" type="image/png">
     <title>URL Shortener App</title>
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -170,6 +171,10 @@
                         errorContainer.innerHTML = `${errorStatus} : ${data.error}`;
                         // Append the alert above the register button
                         submit_btn.before(errorContainer);
+                    }
+                    else if (response.status === 404) {
+                        alert(data.error.replaceAll('<br>', '\n'));
+                        window.location.href = data.redirectTo;
                     } else
                         alert(errorStatus);
                 }

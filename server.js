@@ -22,12 +22,14 @@ app.set("view engine", "ejs");
 //? You need cookie-parser when you want to read cookies sent by the client in incoming HTTP requests.
 app.use(cookieParser());
 
+//! Creating temporary session
 app.use(session({
     secret: process.env.SECRET,
     resave: true,
     saveUninitialized: false
 }));
 
+//! Setting flash message for each session
 app.use(flash());
 
 app.use(requestIp.mw()); //! Helps in getting IP using req.clientIP;

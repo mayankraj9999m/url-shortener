@@ -8,6 +8,41 @@
       "when": 1751826474655,
       "tag": "0000_daily_miek",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1752049798258,
+      "tag": "0001_numerous_rictor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1752051595716,
+      "tag": "0002_dizzy_runaways",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1752057107604,
+      "tag": "0003_last_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1752061748635,
+      "tag": "0004_cool_jocasta",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1752216660456,
+      "tag": "0005_colossal_doctor_doom",
+      "breakpoints": true
     }
   ]
 }

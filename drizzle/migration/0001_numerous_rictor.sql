@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `is_email_verified` boolean DEFAULT false NOT NULL;

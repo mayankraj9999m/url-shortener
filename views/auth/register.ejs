@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="./register.css">
+    <link rel="icon" href="./Images/download.png" type="image/png">
 </head>
 
 <body>
@@ -62,7 +63,7 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('Account Created.\nRedirecting to Login Page');
+                alert('Account Created.\nRedirecting to Email Verification Page\nCode has been sent to your email.');
                 window.location.href = data.redirectTo;
             } else {
                 // Remove existing alerts

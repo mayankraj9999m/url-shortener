@@ -19,6 +19,18 @@ router
     .route("/me")
     .get(authControllers.getMe);
 router
+    .route("/profile")
+    .get(authControllers.getProfilePage);
+router
+    .route("/verify-email")
+    .get(authControllers.getEmailVerifyPage);
+router
+    .route("/resend-verification-link")
+    .get(authControllers.resendVerificationLink);
+router
+    .route("/verify-email-token")
+    .get(authControllers.verifyEmailToken);
+router
     .route("/logout")
     .get(authControllers.logoutUser);
 

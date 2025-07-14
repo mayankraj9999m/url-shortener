@@ -1,18 +1,27 @@
 import {boolean, int, mysqlTable, text, timestamp, varchar} from 'drizzle-orm/mysql-core';
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 
 export const usersTable = mysqlTable("users", {
     id: int().autoincrement().primaryKey(),
     name: varchar({length: 255}).notNull(),
     email: varchar({length: 255}).notNull().unique(),
+    isEmailVerified: boolean('is_email_verified').default(false).notNull(),
     password: varchar({length: 255}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
+export const verifyEmailTokensTable = mysqlTable('is_email_valid', {
+    id: int().autoincrement().primaryKey(),
+    userId: int("user_id").notNull().references(() => usersTable.id, {onDelete: "cascade"}),
+    token: varchar({length : 8}).notNull(),
+    expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 DAY)`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 export const sessionsTable = mysqlTable("sessions", {
     id: int().autoincrement().primaryKey(),
-    userId: int('user_id').notNull().references(() => usersTable.id, {onDelete:"cascade"}),
+    userId: int('user_id').notNull().references(() => usersTable.id, {onDelete: "cascade"}),
     valid: boolean().default(true).notNull(),
     userAgent: text("user_agent"),
     ip: varchar({length: 255}),
@@ -22,23 +31,24 @@ export const sessionsTable = mysqlTable("sessions", {
 
 export const short_link = mysqlTable('short_links_table', {
     id: int("serial_no").autoincrement().primaryKey(),
-    url: varchar("url", { length: 255 }).notNull(),
-    shortCode: varchar("short_code", { length: 20 }).notNull().unique(),
+    url: varchar("url", {length: 255}).notNull(),
+    shortCode: varchar("short_code", {length: 20}).notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: int("user_id")
         .notNull()
-        .references(() => usersTable.id),
+        .references(() => usersTable.id, {onDelete: "cascade"}),
 });
 
-// A user can have many short links
-export const usersRelation = relations(usersTable, ({ many }) => ({
+// A user can have many short links, sessions, tokens for email verification
+export const usersRelation = relations(usersTable, ({many}) => ({
     shortLink: many(short_link),
     session: many(sessionsTable),
+    token: many(verifyEmailTokensTable)
 }));
 
 // A short link belongs to a user
-export const shortLinksRelation = relations(short_link, ({ one }) => ({
+export const shortLinksRelation = relations(short_link, ({one}) => ({
     user: one(usersTable, {
         fields: [short_link.userId], //foreign key
         references: [usersTable.id],
@@ -46,12 +56,20 @@ export const shortLinksRelation = relations(short_link, ({ one }) => ({
 }));
 
 // A session belongs to a user
-export const sessionsRelation = relations(sessionsTable, ({ one }) => ({
+export const sessionsRelation = relations(sessionsTable, ({one}) => ({
     user: one(usersTable, {
         fields: [sessionsTable.userId], //foreign key
         references: [usersTable.id],
     }),
 }));
+
+// A token belongs to a user
+export const emailVerifyTokenRelation = relations(verifyEmailTokensTable, ({one}) => ({
+    user: one(usersTable, {
+        fields: [verifyEmailTokensTable.userId], //foreign key
+        references: [usersTable.id],
+    })
+}))
 
 //! Practical use case
 // The `relations()` functions from `drizzle-orm` are used to define relationships between database tables so that your ORM knows how entities are connected. This enables you to **easily query related data**, like retrieving a user’s short links or sessions without writing raw SQL.

@@ -11,12 +11,14 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar">
+        <a href="/"><img src="./Images/download.png" alt="logo"></a>
         <ul class="navbar-links">
             <li><a href="/">Home</a></li>
             <li><a href="/dev">Developers</a></li>
             <li><a href="/contact">Contact</a></li>
             <% if (username) { %>
-                <li><a href="/logout">Logout</a> </li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
             <% } else { %>
                 <li><a href="/login">Login</a></li>
                 <li><a href="/register">Registration</a></li>

@@ -1,10 +1,12 @@
-import {and, eq} from "drizzle-orm";
+import {and, eq, lt, gte, sql} from "drizzle-orm";
 import {db} from "../config/db.js";
-import {sessionsTable, usersTable} from "../drizzle/schema.js";
+import {sessionsTable, short_link, usersTable, verifyEmailTokensTable} from "../drizzle/schema.js";
 // import bcrypt from "bcryptjs";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import {ACCESS_TOKEN_EXPIRY, MILLISECONDS_PER_SECOND, REFRESH_TOKEN_EXPIRY} from "../config/constants.js";
+import crypto from "crypto";
+import {verifyEmailSchema} from "../validators/auth_validator.js";
 
 export const getUserByEmail = async (email) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
@@ -48,8 +50,8 @@ export const createSession = async (userId, {ip, userAgent}) => {
     return session;
 }
 
-export const createAccessToken = ({id, name, email, sessionId}) => {
-    return jwt.sign({id, name, email, sessionId}, process.env.JWT_SECRET, {
+export const createAccessToken = (userInfo) => {
+    return jwt.sign(userInfo, process.env.JWT_SECRET, {
         expiresIn: ACCESS_TOKEN_EXPIRY / MILLISECONDS_PER_SECOND
     });
 }
@@ -93,6 +95,7 @@ export const refreshTokens = async (refreshToken) => {
             id: user.id,
             name: user.name,
             email: user.email,
+            isEmailVerified: user.isEmailVerified,
             sessionId: currentSession.id
         }
 
@@ -126,6 +129,83 @@ export const setCookies = (req, res, accessToken, refreshToken) => {
     res.cookie("refresh_token", refreshToken, {
         ...baseConfig, maxAge: REFRESH_TOKEN_EXPIRY
     })
+}
+
+export const getAllShortLinksByUserId = async (userId) => {
+    return db.select().from(short_link).where(eq(short_link.userId, userId));
+}
+
+export const generateRandomToken = (digit = 8) => {
+    const min = 10**(digit-1);
+    const max = 10**(digit);
+
+    return crypto.randomInt(min, max).toString();
+}
+
+export const insertVerifyEmailToken = async ({userId, token}) => {
+    return db.transaction(async (tx) => {
+        try {
+            //* delete all expired tokens from email verify tokens table
+            await tx.delete(verifyEmailTokensTable).where(lt(verifyEmailTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`));
+            //* delete all tokens for the specific user
+            await tx.delete(verifyEmailTokensTable).where(eq(verifyEmailTokensTable.userId, userId));
+            await tx.insert(verifyEmailTokensTable).values({userId, token});
+        } catch (err) {
+            console.error("Failed to insert verification token.", err);
+            throw new Error("Unable to create verification token");
+        }
+    })
+}
+
+export const createEmailVerifyLink = async (req, {email, token}) => {
+    // const uriEncodedEmail = encodeURIComponent(email);
+    // return `${req.host}/verify-email-token?token=${token}&email=${uriEncodedEmail}`;
+
+    //! Using URL Api
+    const url = new URL(`${req.protocol}://${req.host}/verify-email-token`);
+    url.searchParams.append('token', token);
+    url.searchParams.append('email', email);
+
+    return url.toString();
+}
+
+export const verifyEmailInDatabase = async (req, res, token, email) => {
+    const tokenExists = await db.select({ userId : verifyEmailTokensTable.userId }).from(verifyEmailTokensTable).where(
+        and(
+            eq(verifyEmailTokensTable.token, token),
+            gte(verifyEmailTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`)
+        )
+    );
+
+    if (!tokenExists.length) return null;
+
+    //! Update users table user as a verified USER
+    const [isUpdated] = await db.update(usersTable).set({isEmailVerified : true}).where(
+        and(
+            eq(usersTable.id, tokenExists[0].userId),
+            eq(usersTable.email, email)
+        )
+    );
+
+    if (!isUpdated.affectedRows) return null;
+    const userInfo = {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        isEmailVerified: true,
+        sessionId: req.user.sessionId,
+    }
+
+    //! Creating new refresh and access tokens and setting them
+    const newTokens =  createTokens(userInfo);
+    setCookies(req, res, newTokens.accessToken, newTokens.refreshToken);
+
+    //! Delete that token now
+    const isDeleted = await db.delete(verifyEmailTokensTable).where(
+        eq(verifyEmailTokensTable.token, token)
+    );
+
+    return true;
 }
 
 // export const getUser = async (credentials) => {

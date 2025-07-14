@@ -7,7 +7,6 @@ import z from "zod";
 export const getShortenerPage = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     try {
-        if (!req.user) return res.redirect("/login");
         const links = await loadLinks(req.user.id);
 
         //* Getting data of cookies (Using Node.js)
@@ -28,7 +27,7 @@ export const getShortenerPage = async (req, res) => {
         //? console.log('Status(Logged IN) : ', isLoggedIn);
         //? console.log('Status(Is HUMAN) : ', userName);
 
-        res.render("index", {links: links, host: req.host, errors: req.flash("errors"), errors1: req.flash("errors1")});
+        res.render("index", {links: links, host: req.host, errors: req.flash("errors")});
     } catch (error) {
         console.error(error);
         return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
@@ -43,7 +42,7 @@ export const postURLShortener = async (req, res) => {
         const finalShortCode = shortCode || crypto.randomBytes(4).toString('hex');
 
         //! Using Zod Validation
-        const {data, error} = shortCodeSchema.safeParse(req.body);
+        const {error} = shortCodeSchema.safeParse({url, shortCode : finalShortCode});
 
         if (error) {
             const errors = error.errors.reduce((acc, e, i) => acc + `${i+1}) ` + e.message + "<br>", '');
@@ -51,7 +50,7 @@ export const postURLShortener = async (req, res) => {
             return res.redirect("/");
         }
 
-        const [links] = await loadLinks(req.user.id, shortCode);
+        const [links] = await loadLinks(req.user.id, finalShortCode);
         if (links) {
             req.flash("errors", "Short Code already exists. Please choose another.");
             return res.redirect("/");
@@ -71,9 +70,9 @@ export const postURLShortener = async (req, res) => {
 };
 
 export const redirectToShortLink = async (req, res) => {
-    if (!req.user) return res.redirect("/login");
     try {
         const {shortCode} = req.params;
+        if (!req.user) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
         const [links] = await loadLinks(req.user.id, shortCode);
         if (!links) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
         console.log(`Redirected to : ${links.shortCode}`);
@@ -91,7 +90,7 @@ export const getEJSDeveloperPage = (req, res) => {
 export const deleteShortCode = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     const shortCode = req.params.id;
-    const resFromDB = await deleteLinks(shortCode);
+    const resFromDB = await deleteLinks(shortCode, req.user.id);
     if (resFromDB) {
         const response = {success: true, message: `Deleted Short Code: ${shortCode}`};
         res.status(200).json(response);
@@ -111,15 +110,15 @@ export const editShortLink = async (req, res) => {
     const {url, shortCode} = req.body;
 
     //! Using Zod Validation
-    const { data, error: validationError } = shortCodeSchema.safeParse(req.body);
+    const { error: validationError } = shortCodeSchema.safeParse(req.body);
 
     if (validationError) {
-        const errors = validationError.errors.reduce((acc, e, i) => acc + `${i+1}) ` + e.message + "<br>", '');
+        const errors = validationError.errors.reduce((acc, e, i) => acc + `${i+1}) ` + e.message + "<br>", '<br>');
         return res.status(409).json({success: false, redirectTo: "/", error: errors});
     }
     try {
         const resp = await editShortLinkDatabase(id, url, shortCode, req.user.id);
-        if (!resp) return res.status(409).json({success: false, redirectTo: "/", error: "Can't update short code"});
+        if (!resp[0].affectedRows) return res.status(404).json({success: false, redirectTo: "/", error: "Can't update short code<br>May be deleted"});
         return res.status(200).json({success: true, redirectTo: "/"});
     } catch (err) {
         console.error(err);

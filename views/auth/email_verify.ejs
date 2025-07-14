@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email</title>
+    <link rel="icon" href="./Images/download.png" type="image/png">
+    <link rel="stylesheet" href="./email_verify.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <main>
+        <div class="verify-page">
+            <div class="verify-card">
+                <section class="verify-email">
+                    <h1>Verify Your Email</h1>
+                    <p>Email : <strong><%= user.email %></strong></p>
+                    <p>Your email has not been verified yet. Please verify it.</p>
+                </section>
+                <section class="code">
+                    <input id="input-me" type="text" name="code" data-email="<%= user.email %>" placeholder="Enter 8-digit verification code"/>
+                    <div class="control-links">
+                        <a href="/resend-verification-link">Resend Verification Link</a>
+                        <button class="ctrl-btn">Verify</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <script>
+        const input_field = document.querySelector("input");
+        const verify_button = document.querySelector(".ctrl-btn");
+        verify_button.addEventListener('click', async (event) => {
+            const token = input_field.value;
+            const uriEncodedEmail = encodeURIComponent(input_field.dataset.email);
+            try {
+                const response = await fetch(`/verify-email-token?token=${token}&email=${uriEncodedEmail}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    window.location.href = data.redirectTo;
+                }
+                else {
+                    // Remove existing alerts
+                    document.querySelectorAll(".alert").forEach(el => el.remove());
+                    const control_links = document.querySelector('.control-links');
+                    //! Creating alert message
+                    const errorContainer = document.createElement("p");
+                    errorContainer.className = "alert";
+                    const errorMessage = data.error;
+                    if (response.status === 405) {
+                        errorContainer.innerHTML = `${errorMessage}`;
+                        control_links.before(errorContainer);
+                    }
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
+        })
+
+    </script>
+</body>
+</html>

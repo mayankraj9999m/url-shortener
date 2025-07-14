@@ -1,6 +1,6 @@
 import {refreshTokens, setCookies, verifyJWTTOKEN} from "../models/auth.model.js";
-import {ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY} from "../config/constants.js";
 
+//! NEW AUTHENTICATION : using access and refresh tokens
 export const verifyAuthentication = async (req, res, next) => {
     const accessToken = req.cookies['access_token'];
     const refreshToken = req.cookies['refresh_token'];
@@ -38,6 +38,7 @@ export const verifyAuthentication = async (req, res, next) => {
     return next();
 }
 
+//* OLD : Only access token
 // export const verifyAuthentication = (req, res, next) => {
 //     const token = req.cookies['JWT'];
 //     if (!token) {

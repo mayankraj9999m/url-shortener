@@ -26,3 +26,8 @@ export const registerUserSchema = loginUserSchema.extend({
         .min(3, {message: "Name must be at least 3 characters long"})
         .max(30, {message: "Name must not exceed 30 characters."})
 });
+
+export const verifyEmailSchema = z.object({
+    token: z.string().trim().length(8),
+    email: z.string().trim().email(),
+});
