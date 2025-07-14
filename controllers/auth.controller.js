@@ -6,6 +6,7 @@ import {
     hashPassword, insertVerifyEmailToken, setCookies, setSessionToInvalid, verifyEmailInDatabase
 } from "../models/auth.model.js";
 import { loginUserSchema, registerUserSchema, verifyEmailSchema } from "../validators/auth_validator.js";
+// import { sendEmail } from "../lib/send-email.js";
 import { sendEmail } from "../lib/nodemailer.js";
 import fs from "fs/promises";
 import path from "path";
@@ -76,12 +77,13 @@ export const getLoginPage = (req, res) => {
 export const postLogin = async (req, res) => {
     if (req.user) return res.redirect("/");
     const { email, password } = req.body;
+    console.log(req.body);
+    
 
     //! Validating name, email, password using Zod
-    const { error } = loginUserSchema.safeParse(req.body);
-    // console.log(data, error);
-    if (error) {
-        const errors = error.errors.reduce((acc, e, i) => acc + "<br>" + `${i + 1}) ` + e.message, '');
+    const result = loginUserSchema.safeParse(req.body);
+    if (!result.success) {
+        const errors = result.error.errors.reduce((acc, e, i) => acc + "<br>" + `${i + 1}) ` + e.message, '');
         return res.status(401).json({ success: false, redirectTo: "/login", error: errors });
     }
 
@@ -258,6 +260,9 @@ export const verifyEmailToken = async (req, res) => {
     if (!db_res_verify) {
         return res.status(405).send({ success: false, error: "Token Expired/Invalid" });
     }
+
+    // console.log("Request headers:", req.headers);
+    // console.log("User:", req.user);
 
     // Success
     if (req.headers.accept.includes("application/json")) {
