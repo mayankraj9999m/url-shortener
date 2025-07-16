@@ -40,11 +40,20 @@ export const short_link = mysqlTable('short_links_table', {
         .references(() => usersTable.id, {onDelete: "cascade"}),
 });
 
-// A user can have many short links, sessions, tokens for email verification
+export const passwordResetTokensTable = mysqlTable('password_reset_tokens', {
+    id: int().autoincrement().primaryKey(),
+    userId: int("user_id").notNull().references(() => usersTable.id, {onDelete: "cascade"}),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 HOUR)`).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+// A user can have many short links, sessions, tokens for email verification, and token hash for forgot password
 export const usersRelation = relations(usersTable, ({many}) => ({
     shortLink: many(short_link),
     session: many(sessionsTable),
-    token: many(verifyEmailTokensTable)
+    token: many(verifyEmailTokensTable),
+    tokenHash: many(passwordResetTokensTable),
 }));
 
 // A short link belongs to a user
@@ -67,6 +76,14 @@ export const sessionsRelation = relations(sessionsTable, ({one}) => ({
 export const emailVerifyTokenRelation = relations(verifyEmailTokensTable, ({one}) => ({
     user: one(usersTable, {
         fields: [verifyEmailTokensTable.userId], //foreign key
+        references: [usersTable.id],
+    })
+}))
+
+// A token hash belongs to a user
+export const passwordResetTokenHashRelation = relations(passwordResetTokensTable, ({one}) => ({
+    user: one(usersTable, {
+        fields: [passwordResetTokensTable.userId], //foreign key
         references: [usersTable.id],
     })
 }))

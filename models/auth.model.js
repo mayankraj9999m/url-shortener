@@ -1,12 +1,12 @@
-import {and, eq, lt, gte, sql} from "drizzle-orm";
-import {db} from "../config/db.js";
-import {sessionsTable, short_link, usersTable, verifyEmailTokensTable} from "../drizzle/schema.js";
+import { and, eq, lt, gte, sql, or } from "drizzle-orm";
+import { db } from "../config/db.js";
+import { passwordResetTokensTable, sessionsTable, short_link, usersTable, verifyEmailTokensTable } from "../drizzle/schema.js";
 // import bcrypt from "bcryptjs";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
-import {ACCESS_TOKEN_EXPIRY, MILLISECONDS_PER_SECOND, REFRESH_TOKEN_EXPIRY} from "../config/constants.js";
+import { ACCESS_TOKEN_EXPIRY, MILLISECONDS_PER_SECOND, REFRESH_TOKEN_EXPIRY } from "../config/constants.js";
 import crypto from "crypto";
-import {verifyEmailSchema} from "../validators/auth_validator.js";
+import { verifyEmailSchema } from "../validators/auth_validator.js";
 
 export const getUserByEmail = async (email) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
@@ -45,8 +45,8 @@ export const verifyJWTTOKEN = (token) => {
 }
 
 //? Creating session, access token, refresh token
-export const createSession = async (userId, {ip, userAgent}) => {
-    const [session] = await db.insert(sessionsTable).values({userId, ip, userAgent});
+export const createSession = async (userId, { ip, userAgent }) => {
+    const [session] = await db.insert(sessionsTable).values({ userId, ip, userAgent });
     return session;
 }
 
@@ -57,7 +57,7 @@ export const createAccessToken = (userInfo) => {
 }
 
 export const createRefreshToken = (sessionId) => {
-    return jwt.sign({sessionId}, process.env.JWT_SECRET, {
+    return jwt.sign({ sessionId }, process.env.JWT_SECRET, {
         expiresIn: REFRESH_TOKEN_EXPIRY / MILLISECONDS_PER_SECOND
     });
 }
@@ -87,7 +87,7 @@ export const refreshTokens = async (refreshToken) => {
 
         const user = await findUserById(currentSession.userId);
 
-        if(!user) {
+        if (!user) {
             console.error("Invalid User");
             return null;
         }
@@ -109,7 +109,7 @@ export const refreshTokens = async (refreshToken) => {
 }
 
 export const setSessionToInvalid = async (sessionId) => {
-    await db.update(sessionsTable).set({valid : false}).where(eq(sessionId, sessionsTable.id))
+    await db.update(sessionsTable).set({ valid: false }).where(eq(sessionId, sessionsTable.id))
 }
 
 export const createTokens = (userInfo) => {
@@ -118,11 +118,11 @@ export const createTokens = (userInfo) => {
     //! We will create refresh token
     const refreshToken = createRefreshToken(userInfo.sessionId);
 
-    return {accessToken, refreshToken, user:userInfo};
+    return { accessToken, refreshToken, user: userInfo };
 }
 
 export const setCookies = (req, res, accessToken, refreshToken) => {
-    const baseConfig = {httpOnly: true};
+    const baseConfig = { httpOnly: true };
     res.cookie("access_token", accessToken, {
         ...baseConfig, maxAge: ACCESS_TOKEN_EXPIRY
     })
@@ -136,20 +136,20 @@ export const getAllShortLinksByUserId = async (userId) => {
 }
 
 export const generateRandomToken = (digit = 8) => {
-    const min = 10**(digit-1);
-    const max = 10**(digit);
+    const min = 10 ** (digit - 1);
+    const max = 10 ** (digit);
 
     return crypto.randomInt(min, max).toString();
 }
 
-export const insertVerifyEmailToken = async ({userId, token}) => {
+export const insertVerifyEmailToken = async ({ userId, token }) => {
     return db.transaction(async (tx) => {
         try {
             //* delete all expired tokens from email verify tokens table
             await tx.delete(verifyEmailTokensTable).where(lt(verifyEmailTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`));
             //* delete all tokens for the specific user
             await tx.delete(verifyEmailTokensTable).where(eq(verifyEmailTokensTable.userId, userId));
-            await tx.insert(verifyEmailTokensTable).values({userId, token});
+            await tx.insert(verifyEmailTokensTable).values({ userId, token });
         } catch (err) {
             console.error("Failed to insert verification token.", err);
             throw new Error("Unable to create verification token");
@@ -157,7 +157,7 @@ export const insertVerifyEmailToken = async ({userId, token}) => {
     })
 }
 
-export const createEmailVerifyLink = async (req, {email, token}) => {
+export const createEmailVerifyLink = async (req, { email, token }) => {
     // const uriEncodedEmail = encodeURIComponent(email);
     // return `${req.host}/verify-email-token?token=${token}&email=${uriEncodedEmail}`;
 
@@ -170,7 +170,7 @@ export const createEmailVerifyLink = async (req, {email, token}) => {
 }
 
 export const verifyEmailInDatabase = async (req, res, token, email) => {
-    const tokenExists = await db.select({ userId : verifyEmailTokensTable.userId }).from(verifyEmailTokensTable).where(
+    const tokenExists = await db.select({ userId: verifyEmailTokensTable.userId }).from(verifyEmailTokensTable).where(
         and(
             eq(verifyEmailTokensTable.token, token),
             gte(verifyEmailTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`)
@@ -180,7 +180,7 @@ export const verifyEmailInDatabase = async (req, res, token, email) => {
     if (!tokenExists.length) return null;
 
     //! Update users table user as a verified USER
-    const [isUpdated] = await db.update(usersTable).set({isEmailVerified : true}).where(
+    const [isUpdated] = await db.update(usersTable).set({ isEmailVerified: true }).where(
         and(
             eq(usersTable.id, tokenExists[0].userId),
             eq(usersTable.email, email)
@@ -197,7 +197,7 @@ export const verifyEmailInDatabase = async (req, res, token, email) => {
     }
 
     //! Creating new refresh and access tokens and setting them
-    const newTokens =  createTokens(userInfo);
+    const newTokens = createTokens(userInfo);
     setCookies(req, res, newTokens.accessToken, newTokens.refreshToken);
 
     //! Delete that token now
@@ -206,6 +206,58 @@ export const verifyEmailInDatabase = async (req, res, token, email) => {
     );
 
     return true;
+}
+
+export const changeNameInMySQL = async (name, id) => {
+    return db.update(usersTable).set({ name }).where(eq(usersTable.id, id));
+};
+
+export const changePasswordInMySql = async (credentials, userId) => {
+    const { currPassword, newPassword, confirmNewPassword } = credentials;
+    const [hashed] = await db.select({ hashed: usersTable.password }).from(usersTable).where(eq(userId, usersTable.id))
+
+    if (!await comparePassword(currPassword, hashed.hashed)) {
+        return false;
+    }
+
+    const newHashed = await hashPassword(newPassword);
+
+    return db.update(usersTable).set({ password: newHashed }).where(eq(usersTable.id, userId));
+}
+
+export const insertResetTokenInDatabase = async (tokenHash, userId) => {
+    return db.insert(passwordResetTokensTable).values({ userId, tokenHash });
+}
+
+export const resetPasswordLink = (req, token) => {
+    //! Using URL Api
+    const url = new URL(`${req.protocol}://${req.host}/forgot-password/${token}`);
+    return url.toString();
+}
+
+export const validatePasswordResetToken = async (tokenHash) => {
+    return db.select().from(passwordResetTokensTable).where(
+        and(
+            eq(tokenHash, passwordResetTokensTable.tokenHash),
+            gte(passwordResetTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`)
+        )
+    )
+}
+
+export const resetPasswordInMySql = async (credentials, userId) => {
+    const { newPassword } = credentials;
+    const newHashed = await hashPassword(newPassword);
+
+    return db.update(usersTable).set({ password: newHashed }).where(eq(usersTable.id, userId));
+}
+
+export const deleteResetTokens  = async (token) => {
+    return db.delete(passwordResetTokensTable).where(
+        or(
+            eq(token, passwordResetTokensTable.tokenHash),
+            lt(passwordResetTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`)
+        )
+    )
 }
 
 // export const getUser = async (credentials) => {

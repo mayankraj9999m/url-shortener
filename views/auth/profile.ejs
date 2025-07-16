@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    <link rel="icon" href="./Images/download.png" type="image/png">
-    <link rel="stylesheet" href="./profile.css">
+    <link rel="icon" href="/Images/download.png" type="image/png">
+    <link rel="stylesheet" href="/profile.css">
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -15,14 +15,18 @@
             <div class="profile-card">
                 <div class="basic-details">
                     <section class="avatar-placeholder"><span><%= user.name.charAt(0).toUpperCase() %></span></section>
-                    <section>
+                    <section id="user-detail" style="width: 100%; overflow: hidden;">
                         <p class="name"><%= user.name.toUpperCase() %></p>
+                        <div class="name-ctr hide">
+                            <input class="input-name name">
+                            <button class="ctrl-btn">Change Name</button>
+                        </div>
                         <div>
-                            <img src="./Images/email.svg" alt="email"/>
+                            <img src="/Images/email.svg" alt="email"/>
                             <p><%= user.email %></p>
                         </div>
                         <div>
-                            <img src="./Images/calendar.svg" alt="calendar"/>
+                            <img src="/Images/calendar.svg" alt="calendar"/>
                             <p>Member since <%= user.createdAt %></p>
                         </div>
                     </section>
@@ -62,11 +66,48 @@
                 </div>
             </div>
             <div class="controls">
-                <button class="ctrl-btn">Change Password</button>
-                <button class="ctrl-btn" disabled>Edit Profile</button>
+                <button class="ctrl-btn"><a href="/change-password">Change Password</a></button>
+                <button class="ctrl-btn">Edit Profile</button>
                 <button class="ctrl-btn"><a href="/logout">Logout</a></button>
             </div>
         </div>
     </main>
+    <script>
+        // Get the Edit Profile Button
+        const editProfile = document.querySelectorAll('.controls .ctrl-btn')[1];
+        const nameField = document.querySelector("p[class='name']");
+        const nameInputCtr = document.querySelector('.name-ctr');
+        editProfile.addEventListener('click', (event) => {
+            event.preventDefault();
+            nameField.classList.toggle("hide");
+            nameInputCtr.classList.toggle("hide");
+        });
+
+        //* getting change button
+        const changeBtn = document.querySelector(".name-ctr button");
+        const inputName = document.querySelector(".input-name");
+        
+        changeBtn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                console.log(inputName.value);
+                const response = await fetch("/change-name", {
+                    method : "POST",
+                    headers: {"Content-Type" : "application/json"},
+                    body : JSON.stringify({name : inputName.value})
+                });
+                if (response.ok) {
+                    window.location.reload();
+                }
+                else {
+                    const error = await response.json();
+                    alert(error.error);
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        })
+    </script>
 </body>
 </html>
