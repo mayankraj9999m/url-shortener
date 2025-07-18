@@ -202,7 +202,8 @@ export const getProfilePage = async (req, res) => {
             createdAt: formattedDate,
             links: userShortLinks,
             isEmailVerified: req.user.isEmailVerified,
-            onlineSignIn: !user.password
+            onlineSignIn: !user.password,
+            avatarUrl: user.avatarUrl
         }
     });
 };
@@ -491,7 +492,7 @@ export const getGoogleLoginCallback = async (req, res) => {
     }
 
     const claims = decodeIdToken(tokens.idToken());
-    const { sub: googleUserId, name, email } = claims;
+    const { sub: googleUserId, name, email, picture } = claims;
 
     //! There are few things that we should do
     //! Condition 1: User already exists with google's oauth linked
@@ -510,6 +511,7 @@ export const getGoogleLoginCallback = async (req, res) => {
             userId: user.id,
             provider: "google",
             providerAccountId: googleUserId,
+            avatarUrl: picture,
         });
     }
 
@@ -520,6 +522,7 @@ export const getGoogleLoginCallback = async (req, res) => {
             email,
             provider: "google",
             providerAccountId: googleUserId,
+            avatarUrl: picture,
         });
     }
 

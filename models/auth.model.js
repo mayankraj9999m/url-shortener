@@ -1,4 +1,4 @@
-import { and, eq, lt, gte, sql, or } from "drizzle-orm";
+import { and, eq, lt, gte, sql, or, isNull } from "drizzle-orm";
 import { db } from "../config/db.js";
 import { oauthAccountsTable, passwordResetTokensTable, sessionsTable, short_link, usersTable, verifyEmailTokensTable } from "../drizzle/schema.js";
 // import bcrypt from "bcryptjs";
@@ -215,7 +215,7 @@ export const changeNameInMySQL = async (name, id) => {
 export const changePasswordInMySql = async (credentials, userId) => {
     const { currPassword, newPassword, confirmNewPassword } = credentials;
     const [hashed] = await db.select({ hashed: usersTable.password }).from(usersTable).where(eq(userId, usersTable.id));
-    
+
     if (!hashed || !hashed?.hashed) {
         return false;
     }
@@ -286,15 +286,24 @@ export async function getUserWithOauthId({ email, provider }) {
     return user;
 }
 
-export async function linkUserWithOauth({ userId, provider, providerAccountId }) {
+export async function linkUserWithOauth({ userId, provider, providerAccountId, avatarUrl }) {
     db.insert(oauthAccountsTable).values({
         userId,
         provider,
         providerAccountId,
     });
+
+    if (avatarUrl) {
+        await db.update(usersTable).set({ avatarUrl }).where(
+            and(
+                eq(usersTable.id, userId),
+                isNull(usersTable.avatarUrl)
+            )
+        )
+    }
 }
 
-export async function createUserWithOauth({ name, email, provider, providerAccountId }) {
+export async function createUserWithOauth({ name, email, provider, providerAccountId, avatarUrl }) {
     const user = await db.transaction(async (trx) => {
         try {
             const [user] = await trx
@@ -304,6 +313,7 @@ export async function createUserWithOauth({ name, email, provider, providerAccou
                     name,
                     // password: "",
                     isEmailVerified: true, // we know that google's email is valid
+                    avatarUrl
                 });
 
             await trx.insert(oauthAccountsTable).values({
@@ -323,7 +333,7 @@ export async function createUserWithOauth({ name, email, provider, providerAccou
             console.error(err);
         }
     });
-    
+
     return user;
 }
 

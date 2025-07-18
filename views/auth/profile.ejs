@@ -14,7 +14,13 @@
             <h1>Your Profile</h1>
             <div class="profile-card">
                 <div class="basic-details">
-                    <section class="avatar-placeholder"><span><%= user.name.charAt(0).toUpperCase() %></span></section>
+                    <section class="avatar-placeholder">
+                        <% if (user.avatarUrl) { %>
+                            <span><img src="<%= user.avatarUrl %>" alt="avatar"></span>
+                        <% } else  {%>
+                            <span><%= user.name.charAt(0).toUpperCase() %></span>
+                        <% } %>
+                    </section>
                     <section id="user-detail" style="width: 100%; overflow: hidden;">
                         <p class="name"><%= user.name.toUpperCase() %></p>
                         <div class="name-ctr hide">
