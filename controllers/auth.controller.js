@@ -3,15 +3,20 @@ import {
     changePasswordInMySql,
     comparePassword, createEmailVerifyLink,
     createSession, createTokens,
-    createUser, deleteResetTokens, findUserById, generateRandomToken, getAllShortLinksByUserId,
+    createUser, createUserWithOauth, deleteResetTokens, findUserById, generateRandomToken, getAllShortLinksByUserId,
     getUserByEmail,
-    hashPassword, insertResetTokenInDatabase, insertVerifyEmailToken, resetPasswordInMySql, resetPasswordLink, setCookies, setSessionToInvalid, validatePasswordResetToken, verifyEmailInDatabase
+    getUserWithOauthId,
+    hashPassword, insertResetTokenInDatabase, insertVerifyEmailToken, linkUserWithOauth, resetPasswordInMySql, resetPasswordLink, setCookies, setSessionToInvalid, validatePasswordResetToken, verifyEmailInDatabase
 } from "../models/auth.model.js";
 import { changeNameSchema, changePasswordSchema, forgotPasswordSchema, loginUserSchema, registerUserSchema, resetPasswordSchema, verifyEmailSchema } from "../validators/auth_validator.js";
 // import { sendEmail } from "../lib/send-email.js";
 import { sendEmail } from "../lib/nodemailer.js";
 import { readEmailFile } from "../lib/readEmailFile.js";
 import crypto from "crypto";
+import { decodeIdToken, generateCodeVerifier, generateState, GitHub } from "arctic";
+import { OAUTH_EXCHANGE_EXPIRY } from "../config/constants.js";
+import { google } from "../lib/oauth/google.js";
+import { github } from "../lib/oauth/github.js";
 
 export const getRegisterPage = (req, res) => {
     if (req.user) return res.redirect("/");
@@ -71,14 +76,12 @@ export const postRegister = async (req, res) => {
 
 export const getLoginPage = (req, res) => {
     if (req.user) return res.redirect("/");
-    res.render("auth/login");
+    res.render("auth/login", { errors: req.flash("errors") });
 };
 
 export const postLogin = async (req, res) => {
     if (req.user) return res.redirect("/");
     const { email, password } = req.body;
-    console.log(req.body);
-
 
     //! Validating name, email, password using Zod
     const result = loginUserSchema.safeParse(req.body);
@@ -91,6 +94,12 @@ export const postLogin = async (req, res) => {
     const isCorrectUser = await getUserByEmail(email);
     if (!isCorrectUser) {
         return res.status(401).json({ success: false, redirectTo: "/login", error: "Invalid User" });
+    }
+
+    if (!isCorrectUser.password) {
+        // database hash password
+        // if password is null
+        return res.status(401).json({ success: false, redirectTo: "/login", error: "You have created account using social login. Please login with your social account." });
     }
 
     //* Compare the password
@@ -161,7 +170,7 @@ export const getProfilePage = async (req, res) => {
     //* Finding user by Id
     const user = await findUserById(req.user.id);
     if (!user) {
-        res.redirect("/login");
+        return await logoutUser();
     }
 
     if (req.user.isEmailVerified !== user.isEmailVerified) {
@@ -183,6 +192,7 @@ export const getProfilePage = async (req, res) => {
     //* Converting date
     const options = { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' };
     const formattedDate = new Date(user.createdAt).toLocaleDateString('en-GB', options);
+    // console.log(user);
 
     res.render("auth/profile.ejs", {
         user: {
@@ -192,6 +202,7 @@ export const getProfilePage = async (req, res) => {
             createdAt: formattedDate,
             links: userShortLinks,
             isEmailVerified: req.user.isEmailVerified,
+            onlineSignIn: !user.password
         }
     });
 };
@@ -224,7 +235,6 @@ export const changeName = async (req, res) => {
         return res.status(200).send({ success: true });
     } catch (error) {
         console.log(error);
-
         return res.status(401).send({ success: false, error: "Can't update" });
     }
 };
@@ -232,7 +242,7 @@ export const changeName = async (req, res) => {
 export const getEmailVerifyPage = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     const user = await findUserById(req.user.id);
-    if (!user) return res.redirect("/login");
+    if (!user) return await logoutUser();
     if (req.user.isEmailVerified) return res.redirect("/profile");
 
     //* Send verification code
@@ -272,7 +282,7 @@ export const resendVerificationLink = async (req, res) => {
 export const verifyEmailToken = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     const user = await findUserById(req.user.id);
-    if (!user) return res.redirect("/login");
+    if (!user) return await logoutUser();
     if (req.user.isEmailVerified) return res.redirect("/profile");
 
     const { data, error } = verifyEmailSchema.safeParse(req.query);
@@ -311,14 +321,24 @@ export const changePassword = async (req, res) => {
 
     //! Zod Validation
     const { error } = changePasswordSchema.safeParse(data);
+
     if (error) {
         const errors = error.errors.reduce((acc, e, i) => acc + `${i + 1}) ` + e.message + "<br>", '');
         return res.status(409).json({ success: false, redirectTo: "/change-password", error: errors });
     }
 
     const updateRes = await changePasswordInMySql(data, req.user.id);
+
     if (!updateRes) {
-        return res.status(409).json({ success: false, redirectTo: "/change-password", error: "Wrong current password" });
+        return res.status(409).json({
+            success: false, redirectTo: "/change-password", error: `Wrong current password/ maybe you logged in with google.<br>
+            Steps:<br>
+            \t1. Please logout<br>
+            2. Go to login page<br>
+            3. Click on forgot password<br>
+            4. Enter your registered email<br>
+            5. You will get verification link on your registered email<br>
+            6. Click on the link to set new password` });
     }
     if (updateRes.affectedRows === 0) {
         return res.status(409).json({ success: false, redirectTo: "/change-password", error: "DATABASE ERROR : Password can't be changed" });
@@ -381,7 +401,7 @@ export const getResetPasswordPage = async (req, res) => {
     const { token } = req.params;
     //! Verify password reset token in database
     const [isValidToken] = await validatePasswordResetToken(token);
-    
+
     if (!isValidToken) {
         return res.render("auth/token_exp_invalid.ejs");
     }
@@ -393,7 +413,7 @@ export const resetPassword = async (req, res) => {
     const { token } = req.params;
     //! Verify password reset token in database
     const [isValidToken] = await validatePasswordResetToken(token);
-    
+
     if (!isValidToken) {
         return res.render("auth/token_exp_invalid.ejs");
     }
@@ -416,5 +436,265 @@ export const resetPassword = async (req, res) => {
 
     //! Delete that reset token, and all expired tokens from table
     await deleteResetTokens(token);
+    return res.status(200).json({ success: true, redirectTo: "/login" });
+};
+
+//! --------------------------------------------------------------------
+//!                         Google OAuth Signin
+//! --------------------------------------------------------------------
+//* Redirecting user to google login page when "Sign In With Google" selected
+export const getGoogleLoginPage = async (req, res) => {
+    if (req.user) return res.redirect("/");
+
+    const state = generateState();
+    const codeVerifier = generateCodeVerifier();
+    const url = google.createAuthorizationURL(state, codeVerifier, [
+        "openid", "profile", "email"
+    ])
+
+    const cookieConfig = {
+        httpOnly: true,
+        secure: true,
+        maxAge: OAUTH_EXCHANGE_EXPIRY, // 10 minutes time for login
+        sameSite: "lax", // this is such that when google redirects to our website, cookies are maintained 
+    };
+
+    res.cookie("google_oauth_state", state, cookieConfig);
+    res.cookie("google_code_verifier", codeVerifier, cookieConfig);
+
+    return res.redirect(url.toString()); // returning authorization url
+};
+
+//* When google responds to google/callback
+export const getGoogleLoginCallback = async (req, res) => {
+    // google redirects with code, and state in query params
+    // we will use code to find out the user
+    if (req.user) return res.redirect("/");
+    const { code, state } = req.query;
+
+    const {
+        google_oauth_state: storedState,
+        google_code_verifier: codeVerifier,
+    } = req.cookies;
+
+    if (!code || !state || !storedState || !codeVerifier || state !== storedState) {
+        req.flash("errors", "Couldn't login with google due to invalid login attempt. Please try again.");
+        return res.redirect("/login");
+    }
+
+    let tokens;
+    try {
+        tokens = await google.validateAuthorizationCode(code, codeVerifier);
+    } catch (error) {
+        req.flash("errors", "Couldn't login with google due to invalid login attempt. Please try again.");
+        return res.redirect("/login");
+    }
+
+    const claims = decodeIdToken(tokens.idToken());
+    const { sub: googleUserId, name, email } = claims;
+
+    //! There are few things that we should do
+    //! Condition 1: User already exists with google's oauth linked
+    //! Condition 2: User already exists with the same email but google's oauth isn't linked
+    //! Condition 3: User doesn't exist.
+
+    // if user is already linked then we will get the user    
+    let user = await getUserWithOauthId({
+        provider: "google",
+        email,
+    });
+
+    // if user exists but user is not linked with oauth
+    if (user && !user.providerAccountId) {
+        await linkUserWithOauth({
+            userId: user.id,
+            provider: "google",
+            providerAccountId: googleUserId,
+        });
+    }
+
+    // if user doesn't exist
+    if (!user) {
+        user = await createUserWithOauth({
+            name,
+            email,
+            provider: "google",
+            providerAccountId: googleUserId,
+        });
+    }
+
+    const session = await createSession(user.id, {
+        ip: req.clientIp,
+        userAgent: req.headers["user-agent"]
+    });
+
+    const userInfo = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        sessionId: session.insertId,
+    };
+
+    //! Creating refresh and access tokens
+    const { accessToken, refreshToken } = createTokens(userInfo);
+    //* Setting cookies in client's browser
+    setCookies(req, res, accessToken, refreshToken);
+
+    res.redirect("/");
+};
+
+//! --------------------------------------------------------------------
+//!                         GitHub OAuth Signin
+//! --------------------------------------------------------------------
+export const getGithubLoginPage = async (req, res) => {
+    if (req.user) return res.redirect("/");
+
+    const state = generateState();
+    const url = github.createAuthorizationURL(state, ["user:email"]);
+
+    const cookieConfig = {
+        httpOnly: true,
+        secure: true,
+        maxAge: OAUTH_EXCHANGE_EXPIRY, // 10 minutes time for login
+        sameSite: "lax", // this is such that when google redirects to our website, cookies are maintained 
+    };
+
+    res.cookie("github_oauth_state", state, cookieConfig);
+
+    return res.redirect(url.toString()); // returning authorization url
+};
+
+export const getGithubLoginCallback = async (req, res) => {
+    const { code, state } = req.query;
+    const { github_oauth_state: storedState } = req.cookies;
+
+    function handleFailedLogin() {
+        req.flash(
+            "errors",
+            "Couldn't login with GitHub because of invalid login attempt. Please try again!"
+        );
+        return res.redirect("/login");
+    }
+
+    if (!code || !state || !storedState || state !== storedState) {
+        return handleFailedLogin();
+    }
+
+    let tokens;
+    try {
+        tokens = await github.validateAuthorizationCode(code);
+    } catch {
+        return handleFailedLogin();
+    }
+
+    const githubUserResponse = await fetch("https://api.github.com/user", {
+        headers: {
+            Authorization: `Bearer ${tokens.accessToken()}`,
+        },
+    });
+    if (!githubUserResponse.ok) return handleFailedLogin();
+    const githubUser = await githubUserResponse.json();
+    const { id: githubUserId, name } = githubUser;
+
+    const githubEmailResponse = await fetch(
+        "https://api.github.com/user/emails",
+        {
+            headers: {
+                Authorization: `Bearer ${tokens.accessToken()}`,
+            },
+        }
+    );
+    if (!githubEmailResponse.ok) return handleFailedLogin();
+
+    const emails = await githubEmailResponse.json();
+    const email = emails.filter((e) => e.primary)[0].email; // In GitHub we can have multiple emails, but we only want primary email
+    if (!email) return handleFailedLogin();
+
+    // there are few things that we should do
+    //! Condition 1: User already exists with github's oauth linked
+    //! Condition 2: User already exists with the same email but github's oauth isn't linked
+    //! Condition 3: User doesn't exist.
+
+    let user = await getUserWithOauthId({
+        provider: "github",
+        email,
+    });
+
+    if (user && !user.providerAccountId) {
+        await linkUserWithOauth({
+            userId: user.id,
+            provider: "github",
+            providerAccountId: githubUserId,
+        });
+    }
+
+    if (!user) {
+        user = await createUserWithOauth({
+            name,
+            email,
+            provider: "github",
+            providerAccountId: githubUserId,
+        });
+    }
+
+    const session = await createSession(user.id, {
+        ip: req.clientIp,
+        userAgent: req.headers["user-agent"]
+    });
+
+    const userInfo = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        sessionId: session.insertId,
+    };
+
+    //! Creating refresh and access tokens
+    const { accessToken, refreshToken } = createTokens(userInfo);
+    //* Setting cookies in client's browser
+    setCookies(req, res, accessToken, refreshToken);
+
+    res.redirect("/");
+};
+
+export const getSetPasswordPage = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
+
+    //* Finding user by Id
+    const user = await findUserById(req.user.id);
+    if (!user || user.password) {
+        await logoutUser(); // if user doesn't exists or if user has already a password then logout the signed in user to prevent unauthorized access to set password page
+    }
+
+    return res.render("auth/set_password.ejs");
+};
+
+export const setPassword = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
+
+    //* Finding user by Id
+    const user = await findUserById(req.user.id);
+
+    if (!user || user.password) {
+        await logoutUser();
+    }
+    // const { newPassword, confirmNewPassword } = req.body;
+    const data = req.body;
+
+    //! Zod Validation
+    const { error } = resetPasswordSchema.safeParse(data);
+    if (error) {
+        const errors = error.errors.reduce((acc, e, i) => acc + `${i + 1}) ` + e.message + "<br>", '');
+        return res.status(409).json({ success: false, redirectTo: `/set-password`, error: errors });
+    }
+
+    //! Reset the current password
+    const updateRes = await resetPasswordInMySql(data, user.id);
+    if (updateRes.affectedRows === 0 || !updateRes) {
+        return res.status(409).json({ success: false, redirectTo: `/set-password`, error: "DATABASE ERROR : Password can't be changed" });
+    }
+
     return res.status(200).json({ success: true, redirectTo: "/login" });
 }

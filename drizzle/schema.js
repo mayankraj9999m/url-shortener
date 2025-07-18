@@ -1,55 +1,68 @@
-import {boolean, int, mysqlTable, text, timestamp, varchar} from 'drizzle-orm/mysql-core';
-import {relations, sql} from "drizzle-orm";
+import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from 'drizzle-orm/mysql-core';
+import { relations, sql } from "drizzle-orm";
 
 export const usersTable = mysqlTable("users", {
     id: int().autoincrement().primaryKey(),
-    name: varchar({length: 255}).notNull(),
-    email: varchar({length: 255}).notNull().unique(),
+    name: varchar({ length: 255 }).notNull(),
+    email: varchar({ length: 255 }).notNull().unique(),
     isEmailVerified: boolean('is_email_verified').default(false).notNull(),
-    password: varchar({length: 255}).notNull(),
+    password: varchar({ length: 255 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
 export const verifyEmailTokensTable = mysqlTable('is_email_valid', {
     id: int().autoincrement().primaryKey(),
-    userId: int("user_id").notNull().references(() => usersTable.id, {onDelete: "cascade"}),
-    token: varchar({length : 8}).notNull(),
+    userId: int("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    token: varchar({ length: 8 }).notNull(),
     expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 DAY)`),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
 export const sessionsTable = mysqlTable("sessions", {
     id: int().autoincrement().primaryKey(),
-    userId: int('user_id').notNull().references(() => usersTable.id, {onDelete: "cascade"}),
+    userId: int('user_id').notNull().references(() => usersTable.id, { onDelete: "cascade" }),
     valid: boolean().default(true).notNull(),
     userAgent: text("user_agent"),
-    ip: varchar({length: 255}),
+    ip: varchar({ length: 255 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
 export const short_link = mysqlTable('short_links_table', {
     id: int("serial_no").autoincrement().primaryKey(),
-    url: varchar("url", {length: 255}).notNull(),
-    shortCode: varchar("short_code", {length: 20}).notNull().unique(),
+    url: varchar("url", { length: 255 }).notNull(),
+    shortCode: varchar("short_code", { length: 20 }).notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: int("user_id")
         .notNull()
-        .references(() => usersTable.id, {onDelete: "cascade"}),
+        .references(() => usersTable.id, { onDelete: "cascade" }),
 });
 
 export const passwordResetTokensTable = mysqlTable('password_reset_tokens', {
     id: int().autoincrement().primaryKey(),
-    userId: int("user_id").notNull().references(() => usersTable.id, {onDelete: "cascade"}),
+    userId: int("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
     tokenHash: text("token_hash").notNull(),
     expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 HOUR)`).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+//! OAuth Accounts Table
+export const oauthAccountsTable = mysqlTable("oauth_accounts", {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("user_id")
+        .references(() => usersTable.id, { onDelete: "cascade" }),
+    provider: mysqlEnum("provider", ["google", "github"]).notNull(),
+    providerAccountId: varchar("provider_account_id", { length: 255 })
+        .notNull()
+        .unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+//! Relations of foreign keys of tables
 // A user can have many short links, sessions, tokens for email verification, and token hash for forgot password
-export const usersRelation = relations(usersTable, ({many}) => ({
+export const usersRelation = relations(usersTable, ({ many }) => ({
     shortLink: many(short_link),
     session: many(sessionsTable),
     token: many(verifyEmailTokensTable),
@@ -57,7 +70,7 @@ export const usersRelation = relations(usersTable, ({many}) => ({
 }));
 
 // A short link belongs to a user
-export const shortLinksRelation = relations(short_link, ({one}) => ({
+export const shortLinksRelation = relations(short_link, ({ one }) => ({
     user: one(usersTable, {
         fields: [short_link.userId], //foreign key
         references: [usersTable.id],
@@ -65,7 +78,7 @@ export const shortLinksRelation = relations(short_link, ({one}) => ({
 }));
 
 // A session belongs to a user
-export const sessionsRelation = relations(sessionsTable, ({one}) => ({
+export const sessionsRelation = relations(sessionsTable, ({ one }) => ({
     user: one(usersTable, {
         fields: [sessionsTable.userId], //foreign key
         references: [usersTable.id],
@@ -73,7 +86,7 @@ export const sessionsRelation = relations(sessionsTable, ({one}) => ({
 }));
 
 // A token belongs to a user
-export const emailVerifyTokenRelation = relations(verifyEmailTokensTable, ({one}) => ({
+export const emailVerifyTokenRelation = relations(verifyEmailTokensTable, ({ one }) => ({
     user: one(usersTable, {
         fields: [verifyEmailTokensTable.userId], //foreign key
         references: [usersTable.id],
@@ -81,7 +94,7 @@ export const emailVerifyTokenRelation = relations(verifyEmailTokensTable, ({one}
 }))
 
 // A token hash belongs to a user
-export const passwordResetTokenHashRelation = relations(passwordResetTokensTable, ({one}) => ({
+export const passwordResetTokenHashRelation = relations(passwordResetTokensTable, ({ one }) => ({
     user: one(usersTable, {
         fields: [passwordResetTokensTable.userId], //foreign key
         references: [usersTable.id],

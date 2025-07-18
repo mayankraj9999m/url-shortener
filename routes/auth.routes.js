@@ -51,6 +51,20 @@ router
     .get(authControllers.getResetPasswordPage)
     .post(authControllers.resetPassword);
 
+//? OAuth routes
+//* Google
+router.route("/google").get(authControllers.getGoogleLoginPage);
+router.route("/google/callback").get(authControllers.getGoogleLoginCallback);
+
+//* GitHub
+router.route("/github").get(authControllers.getGithubLoginPage);
+router.route("/github/callback").get(authControllers.getGithubLoginCallback);
+
+//! Set Password
+router.route("/set-password")
+    .get(authControllers.getSetPasswordPage)
+    .post(authControllers.setPassword);
+
 //! Logout the user
 router
     .route("/logout")

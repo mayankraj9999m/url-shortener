@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,77 +8,104 @@
     <link rel="stylesheet" href="/login.css">
     <link rel="icon" href="/Images/download.png" type="image/png">
 </head>
+
 <body>
     <%- include('../partials/header') %>
-    <main>
-        <div class="signin-page">
-            <h1>Login</h1>
-            <a href="/register">Don't have an account?</a>
-            <div class="login-ctr">
-                <figure>
-                    <img src="images/signin-image.jpg" alt="sign in image" />
-                </figure>
-                <form class="signin-form">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="text" id="email" name="email" placeholder="Your Email" autocomplete="off" />
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Password" autocomplete="off" />
-                    </div>
-                    <a href="/forgot-password">Forgot password</a>
-                    <button class="button-29" type="submit">Login</button>
-                </form>
+        <main>
+            <div class="signin-page">
+                <h1>Login</h1>
+                <a href="/register">Don't have an account?</a>
+                <div class="login-ctr">
+                    <figure>
+                        <img src="images/signin-image.jpg" alt="sign in image" />
+                    </figure>
+                    <form class="signin-form">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="text" id="email" name="email" placeholder="Your Email" autocomplete="off" />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" placeholder="Password"
+                                autocomplete="off" />
+                        </div>
+                        <a href="/forgot-password">Forgot password</a>
+                        <% if (errors && errors.length>0) { %>
+                            <p class="alert"><%- errors[0] %></p>
+                        <% } %>
+                        <button class="button-29" type="submit">Login</button>
+                        <!-- Login with google -->
+                        <div class="or-separator">
+                            <div class="line"></div>
+                            <span>OR</span>
+                            <div class="line"></div>
+                        </div>
+                        <!-- Creating BUTTONS FOR LOGIN -->
+                        <div class="login-btns">
+                            <a href="/google">
+                                <button type="button">
+                                    <img src="Images/google_logo.svg" alt="signin with google">
+                                    <span>Google</span>
+                                </button>
+                            </a>
+                            <a href="/github">
+                                <button type="button">
+                                    <img src="Images/github_logo.svg" alt="signin with github">
+                                    <span>GitHub</span>
+                                </button>
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-    </main>
-    <script>
-        const form = document.querySelector(".signin-form");
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            // Web APIs
-            // const formData = new FormData(form, submitter);
-            const formData = new FormData(event.target);
-            const email = formData.get('email');
-            const password = formData.get('password');
+        </main>
+        <script>
+            const form = document.querySelector(".signin-form");
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                // Web APIs
+                // const formData = new FormData(form, submitter);
+                const formData = new FormData(event.target);
+                const email = formData.get('email');
+                const password = formData.get('password');
 
-            // Hitting API
-            try {
-                const response = await fetch('/login', {
-                    method : "POST",
-                    headers : {"Content-Type" : "application/json"},
-                    body : JSON.stringify({ email, password })
-                });
-                const data = await response.json();
+                // Hitting API
+                try {
+                    const response = await fetch('/login', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await response.json();
 
-                if (response.ok) {
-                    alert('Login successful');
-                    window.location.href = data.redirectTo;
+                    if (response.ok) {
+                        alert('Login successful');
+                        window.location.href = data.redirectTo;
+                    }
+                    else {
+                        // Remove existing alerts
+                        document.querySelectorAll(".alert").forEach(el => el.remove());
+
+                        const submit_btn = document.querySelector('button[type="submit"]');
+                        //! Creating alert message
+                        const errorContainer = document.createElement("p");
+                        errorContainer.className = "alert";
+
+                        const errorStatus = response.statusText;
+                        const errorMessage = data.error;
+
+                        if (response.status === 401) {
+                            errorContainer.innerHTML = `${errorStatus} : ${errorMessage}`;
+                            // Append the alert above the login button
+                            submit_btn.before(errorContainer);
+                        } else
+                            alert(errorStatus);
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
-                else {
-                    // Remove existing alerts
-                    document.querySelectorAll(".alert").forEach(el => el.remove());
-
-                    const submit_btn = document.querySelector('button[type="submit"]');
-                    //! Creating alert message
-                    const errorContainer = document.createElement("p");
-                    errorContainer.className = "alert";
-
-                    const errorStatus = response.statusText;
-                    const errorMessage = data.error;
-
-                    if (response.status === 401) {
-                        errorContainer.innerHTML = `${errorStatus} : ${errorMessage}`;
-                        // Append the alert above the login button
-                        submit_btn.before(errorContainer);
-                    } else
-                        alert(errorStatus);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        })
-    </script>
+            })
+        </script>
 </body>
+
 </html>

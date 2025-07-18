@@ -40,35 +40,42 @@ export const changeNameSchema = z.object({
         .max(30, { message: "Name must not exceed 30 characters." })
 });
 
+// Reusable password matching refinement
+const passwordsMatch = (schema) =>
+    schema.refine((data) => data.newPassword === data.confirmNewPassword, {
+        message: "Passwords do not match",
+        path: ["confirmNewPassword"],
+    });
+
+// Base schema for new password fields
 export const baseSchema = z.object({
     newPassword: z
         .string()
         .trim()
         .min(8, { message: "New password must at least 8 characters long" })
         .max(40, { message: "New password must be less than 40 characters long" })
-        .regex(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/,
-            {
-                message: "Password must contain uppercase, lowercase, number, and special character"
-            }
-        ),
-    confirmNewPassword: z.string().trim().min(1, { message: "Confirm password can't be empty" })
-})
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/, {
+            message:
+                "Password must contain uppercase, lowercase, number, and special character",
+        }),
+    confirmNewPassword: z
+        .string()
+        .trim()
+        .min(1, { message: "Confirm password can't be empty" }),
+});
 
-export const resetPasswordSchema = baseSchema.refine(
-    (data) => data.newPassword === data.confirmNewPassword,
-    {
-        message: "Passwords do not match",
-        path: ["confirmNewPassword"],
-    }
+// Schema for resetting password (only new password + confirm)
+export const resetPasswordSchema = passwordsMatch(baseSchema);
+
+// Schema for changing password (requires current password too)
+export const changePasswordSchema = passwordsMatch(
+    baseSchema.extend({
+        currPassword: z
+            .string()
+            .trim()
+            .min(1, { message: "Current password is required" }),
+    })
 );
-
-export const changePasswordSchema = baseSchema.extend({
-    currPassword: z.string().trim().min(1, { message: "Current password is required" }),
-}).refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "Passwords do not match",
-    path: ["confirmNewPassword"],
-});;
 
 export const forgotPasswordSchema = z.object({
     email: z

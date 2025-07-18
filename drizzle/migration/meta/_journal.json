@@ -50,6 +50,13 @@
       "when": 1752603977222,
       "tag": "0006_deep_surge",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1752756447301,
+      "tag": "0007_fine_vivisector",
+      "breakpoints": true
     }
   ]
 }
