@@ -16,7 +16,7 @@
     <!--    <% } %>-->
     <main>
         <div class="container">
-            <div class="status" style="background-color: <%= (username ? "#d6fcc0" : "#fcc0c0") %>">
+            <div class="status" style="background-color: <%= (username ? '#d6fcc0' : '#fcc0c0') %>">
                 <img src="./Images/<%= (username ? "logged" : "notlogged") %>.svg" alt=`<%= (username ? "logged" : "notlogged") %>`/>
                 <p>You are <%= (username ? "" : "not ") %>logged in</p>
             </div>
@@ -80,6 +80,56 @@
             </ul>
         </div>
     </main>
+
+    <%# Pagination component %>
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <%# Previous page link %>
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>" class="page-link">&laquo; Previous</a>
+                <% } else { %>
+                    <span class="page-link disabled">&laquo; Previous</span>
+                <% } %>
+
+                <!-- <span class="page-link current"> <%= currentPage %></span> -->
+                
+                <%# Calculate the range of page numbers to display %>
+                <% let startPage = Math.max(1, currentPage - 2); %>
+                <% let endPage = Math.min(totalPages, currentPage + 2); %>
+
+                <%# Always show first page %>
+                <% if (startPage > 1) { %>
+                    <a href="?page=1" class="page-link">1</a>
+                    <% if (startPage > 2) { %>
+                        <span class="ellipsis">...</span>
+                    <% } %>
+                <% } %>
+        
+                <%# Show page numbers around current page %>
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <% if (i === currentPage) { %>
+                        <span class="page-link current"><%= i %></span>
+                    <% } else { %>
+                        <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+                    <% } %>
+                <% } %>
+ 
+                <%# Always show last page %>
+                <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                        <span class="ellipsis">...</span>
+                    <% } %>
+                    <a href="?page=<%= totalPages %>" class="page-link"><%= totalPages %></a>
+                <% } %>
+                      
+                <%# Next page link %>
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>" class="page-link">Next &raquo;</a>
+                <% } else { %>
+                    <span class="page-link disabled">Next &raquo;</span>
+                <% } %>
+           </div>
+        <% } %>
 
     <script>
         //! delete shortcode
@@ -184,16 +234,16 @@
         }
 
         //! Setting height of list
-        const li = document.querySelectorAll("#shortened-urls li");
-        const height = li[0].clientHeight;
-        const list_ul = document.getElementById('shortened-urls');
-        list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+10}px`;
-        window.addEventListener("resize",(e) => {
-            const li = document.querySelectorAll("#shortened-urls li");
-            const height = li[0].clientHeight;
-            console.log(height);
-            list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+8}px`;
-        });
+        // const li = document.querySelectorAll("#shortened-urls li");
+        // const height = li[0].clientHeight;
+        // const list_ul = document.getElementById('shortened-urls');
+        // list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+10}px`;
+        // window.addEventListener("resize",(e) => {
+        //     const li = document.querySelectorAll("#shortened-urls li");
+        //     const height = li[0].clientHeight;
+        //     console.log(height);
+        //     list_ul['style'].height = `${height*(li.length>1 ? 2 : 1)+8}px`;
+        // });
     </script>
 </body>
 </html>

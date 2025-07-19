@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 
-html,
+/* html,
 body {
     height: 100vh;
-}
+} */
 
 body {
     display: flex;
@@ -32,12 +32,14 @@ main {
     border-radius: 10px;
     padding: 1rem;
     background-color: #ffffff;
-    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    box-shadow:
+        rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+        rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
     width: 80%;
+    margin: 2rem 0;
 }
 
 form {
@@ -65,7 +67,12 @@ button {
     border-radius: 5px;
     border: 0;
     background-color: crimson;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset, rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    box-shadow:
+        rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+        rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+        rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset,
+        rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+        rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     color: white;
     font-weight: 900;
     font-size: 20px;
@@ -193,16 +200,19 @@ ul::-webkit-scrollbar-track {
 }
 
 /* Chrome, Edge, and Safari */
-#shortened-urls p::-webkit-scrollbar, a::-webkit-scrollbar {
+#shortened-urls p::-webkit-scrollbar,
+a::-webkit-scrollbar {
     height: 5px; /* Make it more visible for testing */
 }
 
-#shortened-urls p::-webkit-scrollbar-thumb, a::-webkit-scrollbar-thumb {
+#shortened-urls p::-webkit-scrollbar-thumb,
+a::-webkit-scrollbar-thumb {
     background: #1a71e2;
     border-radius: 10px;
 }
 
-#shortened-urls p::-webkit-scrollbar-track, a::-webkit-scrollbar-track {
+#shortened-urls p::-webkit-scrollbar-track,
+a::-webkit-scrollbar-track {
     background: #87baed;
     border-radius: 4px;
 }
@@ -223,7 +233,8 @@ ul::-webkit-scrollbar-track {
         font-size: 1rem;
     }
 
-    #shortened-urls p::-webkit-scrollbar, a::-webkit-scrollbar {
+    #shortened-urls p::-webkit-scrollbar,
+    a::-webkit-scrollbar {
         height: 0; /* Make it more visible for testing */
     }
 }
@@ -247,7 +258,7 @@ ul::-webkit-scrollbar-track {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -268,18 +279,21 @@ ul::-webkit-scrollbar-track {
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.7);
     opacity: 0;
     /* transform-origin: top left; */
-    transition: top 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    transition:
+        top 0.3s ease,
+        opacity 0.3s ease,
+        transform 0.3s ease;
     &.active {
         top: 50%;
         opacity: 1;
-        transform: translate(-50%,-50%) scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     &.inactive {
         top: 50%;
-        transform: translate(-50%,-50%) scale(0.7);
+        transform: translate(-50%, -50%) scale(0.7);
         opacity: 0;
     }
 }
@@ -336,3 +350,38 @@ label {
 /*.filter button:active {*/
 /*    box-shadow: none;*/
 /*}*/
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 5px;
+}
+
+.page-link {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover:not(.current):not(.disabled) {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.page-link.current {
+    background-color: #4a89dc;
+    color: white;
+    border-color: #4a89dc;
+    cursor: default;
+}
+
+.page-link.disabled {
+    color: #aaa;
+    cursor: not-allowed;
+}
