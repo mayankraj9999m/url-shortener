@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Profile</title>
+    <meta name="referrer" content="no-referrer">
+    <link rel="icon" href="/Images/download.png" type="image/png">
+    <link rel="stylesheet" href="/change_profile.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+        <main>
+            <div id="change-profile-card">
+                <h1>Change Profile</h1>
+                <div id="instuctions">
+                    <p><strong>You can change name, profile photo</strong></p>
+                </div>
+                <form id="profile-form">
+                    <div class="avatar-upload">
+                        <div class="avatar-preview">
+                            <% if (avatarUrl) { %>
+                                <img src="<%= avatarUrl %>" alt="Current profile picture" id="avatar-preview-img">
+                            <% } else { %>
+                                <img src="images/no-image.svg" alt="Preview" id="avatar-preview-img">
+                            <% } %>
+                        </div>
+
+                        <div class="avatar-edit">
+                            <label for="avatar">Change Photo</label>
+                            <!-- <input type="file" id="avatar" name="avatar" accept="image/*" /> -->
+                            <div class="file-upload-wrapper">
+                                <label class="file-label">
+                                    <!-- Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zM7 9l1.41 1.41L11 7.83V16h2V7.83l2.59 2.58L17 9l-5-5-5 5z"/>
+                                    </svg>
+                                    Upload Image
+                                    <input type="file" id="avatar" name="avatar" accept="image/*" onchange="updateFileName(this)">
+                                </label>
+                                <span class="file-name" id="fileName">No file chosen</span>
+                            </div>
+                            <% if (avatarUrl) { %>
+                                <button type="button" id="remove-avatar" class="remove-avatar-btn">REMOVE</button>
+                            <% } %>
+                        </div>
+                    </div>
+                    <label for="name">Name</label>
+                    <input type="text" name="name" value="<%= name %>" id="name" autocomplete="off" placeholder="enter new name (optional)">
+                    <button type="submit" class="button-29">Update Profile</button>
+                </form>
+            </div>
+        </main>
+        <script>
+            // file input : get name of file selected
+            function updateFileName(input) {
+                const fileName = input.files.length > 0 ? input.files[0].name : 'No file chosen';
+                document.getElementById('fileName').textContent = fileName;
+            }
+
+            const form = document.getElementById("profile-form");
+
+            // getting credentials
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+                // If you want to log the values:
+                console.log("Name:", formData.get('name'));
+                console.log("Avatar file:", formData.get('avatar'));
+
+                // fetching API
+                const response = await fetch("/change-profile", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Profile Updated")
+                    window.location.href = data.redirectTo;
+                } else {
+                    // Remove existing alerts
+                    document.querySelectorAll(".alert").forEach(el => el.remove());
+
+                    const submit_btn = document.querySelector('button[type="submit"]');
+                    //! Creating alert message
+                    const errorContainer = document.createElement("p");
+                    errorContainer.className = "alert";
+
+                    const errorStatus = response.statusText;
+                    const errorMessage = data.error;
+
+                    if (response.status === 401) {
+                        errorContainer.innerHTML = `${errorMessage}`;
+                        // Append the alert above the login button
+                        submit_btn.before(errorContainer);
+                    } else
+                        alert(errorStatus);
+                }
+            })
+        </script>
+</body>
+
+</html>

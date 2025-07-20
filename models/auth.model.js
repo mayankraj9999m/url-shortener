@@ -212,6 +212,10 @@ export const changeNameInMySQL = async (name, id) => {
     return db.update(usersTable).set({ name }).where(eq(usersTable.id, id));
 };
 
+export const changeProfileUrlInMySql = async (data) => {
+    return db.update(usersTable).set(data).where(eq(usersTable.id, data.id));
+}
+
 export const changePasswordInMySql = async (credentials, userId) => {
     const { currPassword, newPassword, confirmNewPassword } = credentials;
     const [hashed] = await db.select({ hashed: usersTable.password }).from(usersTable).where(eq(userId, usersTable.id));

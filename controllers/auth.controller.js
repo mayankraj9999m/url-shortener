@@ -1,6 +1,7 @@
 import {
     changeNameInMySQL,
     changePasswordInMySql,
+    changeProfileUrlInMySql,
     comparePassword, createEmailVerifyLink,
     createSession, createTokens,
     createUser, createUserWithOauth, deleteResetTokens, findUserById, generateRandomToken, getAllShortLinksByUserId,
@@ -169,8 +170,9 @@ export const getProfilePage = async (req, res) => {
 
     //* Finding user by Id
     const user = await findUserById(req.user.id);
+
     if (!user) {
-        return await logoutUser();
+        return await logoutUser(req, res);
     }
 
     if (req.user.isEmailVerified !== user.isEmailVerified) {
@@ -192,7 +194,6 @@ export const getProfilePage = async (req, res) => {
     //* Converting date
     const options = { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' };
     const formattedDate = new Date(user.createdAt).toLocaleDateString('en-GB', options);
-    // console.log(user);
 
     res.render("auth/profile.ejs", {
         user: {
@@ -207,6 +208,62 @@ export const getProfilePage = async (req, res) => {
         }
     });
 };
+
+export const getChangeProfilePage = async (req, res) => {
+    if (!req.user) return res.redirect("/");
+
+    //* Finding user by Id
+    const user = await findUserById(req.user.id);
+
+    if (!user) {
+        return await logoutUser(req, res);
+    }
+
+    return res.render("auth/change_profile.ejs", { name: user.name, avatarUrl: user.avatarUrl });
+}
+
+export const postChangeProfile = async (req, res) => {
+    if (!req.user) return res.redirect("/");
+    //* Finding user by Id
+    const user = await findUserById(req.user.id);
+
+    if (!user) {
+        return await logoutUser(req, res);
+    }
+
+    try {
+        //! Validating name using Zod
+        const { data, error } = changeNameSchema.safeParse(req.body);
+        if (error) {
+            return res.status(401).json({ success: false, error: error.errors[0].message });
+        }
+
+        const fileUrl = req.file ? `uploads/avatar/${req.file.filename}` : undefined;
+
+        await changeProfileUrlInMySql({
+            id: req.user.id,
+            name: data.name,
+            avatarUrl: fileUrl
+        });
+
+        const userInfo = {
+            id: req.user.id,
+            name: req.body.name,
+            email: req.user.email,
+            isEmailVerified: req.user.isEmailVerified,
+            sessionId: req.user.sessionId,
+        }
+
+        //! Creating new refresh and access tokens and setting them
+        const newTokens = createTokens(userInfo);
+        setCookies(req, res, newTokens.accessToken, newTokens.refreshToken);
+
+        return res.status(200).send({ success: true, redirectTo: "/profile" });
+    } catch (error) {
+        console.log(error);
+        return res.status(401).send({ success: false, error: "Can't update" });
+    }
+}
 
 export const changeName = async (req, res) => {
     if (!req.user) return res.redirect("/");
@@ -243,7 +300,7 @@ export const changeName = async (req, res) => {
 export const getEmailVerifyPage = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     const user = await findUserById(req.user.id);
-    if (!user) return await logoutUser();
+    if (!user) return await logoutUser(req, res);
     if (req.user.isEmailVerified) return res.redirect("/profile");
 
     //* Send verification code
@@ -283,7 +340,7 @@ export const resendVerificationLink = async (req, res) => {
 export const verifyEmailToken = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     const user = await findUserById(req.user.id);
-    if (!user) return await logoutUser();
+    if (!user) return await logoutUser(req, res);
     if (req.user.isEmailVerified) return res.redirect("/profile");
 
     const { data, error } = verifyEmailSchema.safeParse(req.query);
@@ -668,7 +725,7 @@ export const getSetPasswordPage = async (req, res) => {
     //* Finding user by Id
     const user = await findUserById(req.user.id);
     if (!user || user.password) {
-        await logoutUser(); // if user doesn't exists or if user has already a password then logout the signed in user to prevent unauthorized access to set password page
+        await logoutUser(req, res); // if user doesn't exists or if user has already a password then logout the signed in user to prevent unauthorized access to set password page
     }
 
     return res.render("auth/set_password.ejs");
@@ -681,7 +738,7 @@ export const setPassword = async (req, res) => {
     const user = await findUserById(req.user.id);
 
     if (!user || user.password) {
-        await logoutUser();
+        await logoutUser(req, res);
     }
     // const { newPassword, confirmNewPassword } = req.body;
     const data = req.body;

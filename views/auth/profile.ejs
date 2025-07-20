@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>Profile Page</title>
     <link rel="icon" href="/Images/download.png" type="image/png">
     <link rel="stylesheet" href="/profile.css">
@@ -20,12 +21,15 @@
                         <% } else  {%>
                             <span><%= user.name.charAt(0).toUpperCase() %></span>
                         <% } %>
+                        <a class="edit-image" href="/change-profile">
+                            <img src="images/pencil-solid.svg">
+                        </a>
                     </section>
                     <section id="user-detail" style="width: 100%; overflow: hidden;">
                         <p class="name"><%= user.name.toUpperCase() %></p>
                         <div class="name-ctr hide">
                             <input class="input-name name">
-                            <button class="ctrl-btn">Change Name</button>
+                            <button class="ctrl-btn">Update Name</button>
                         </div>
                         <div>
                             <img src="/Images/email.svg" alt="email"/>
@@ -79,7 +83,7 @@
                         <a href="/change-password">Change Password</a>
                     <% } %>
                 </button>
-                <button class="ctrl-btn">Edit Profile</button>
+                <button class="ctrl-btn">Change Name</button>
                 <button class="ctrl-btn"><a href="/logout">Logout</a></button>
             </div>
         </div>

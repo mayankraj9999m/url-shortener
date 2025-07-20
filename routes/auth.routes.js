@@ -1,6 +1,7 @@
 import express from "express";
 import * as authControllers from "../controllers/auth.controller.js";
 import path from "path";
+import multer from "multer";
 
 const router = express.Router();
 
@@ -42,6 +43,35 @@ router
 router
     .route("/change-name")
     .post(authControllers.changeName);
+
+const avatarStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "public/uploads/avatar");
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}_${Math.random()}${ext}`);
+    }
+});
+
+const avatarFileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+    } else {
+        cb(new Error("Only image files are allowed!"), false);
+    }
+};
+
+const avatarUpload = multer({
+    storage: avatarStorage,
+    fileFilter: avatarFileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+router
+    .route("/change-profile")
+    .get(authControllers.getChangeProfilePage)
+    .post(avatarUpload.single('avatar'), authControllers.postChangeProfile)
 router
     .route("/forgot-password")
     .get(authControllers.getForgotPasswordPage)

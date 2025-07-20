@@ -201,6 +201,7 @@ p::-webkit-scrollbar-track {
     justify-content: center;
     border: 3px solid rgba(255, 255, 255, 0.5);
     overflow: hidden;
+    position: relative;
 }
 
 .avatar-placeholder span {
@@ -213,6 +214,38 @@ p::-webkit-scrollbar-track {
         width: 100%;
         object-fit: fill;
     }
+}
+
+.avatar-placeholder .edit-image {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Initial state - hidden at bottom */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.avatar-placeholder .edit-image img {
+    width: 44%;
+    height: 44%;
+    /* Initial state - invisible and scaled down */
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.4s ease-in-out 0.1s, transform 0.4s ease-in-out 0.1s;
+}
+
+/* Hover effects */
+.avatar-placeholder:hover .edit-image {
+    transform: translateY(0);
+}
+
+.avatar-placeholder:hover .edit-image img {
+    opacity: 1;
+    transform: scale(1);
 }
 
 /*! Controls */
