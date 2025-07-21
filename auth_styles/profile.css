@@ -35,7 +35,10 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: rgba(0, 0, 0, 0.25) 0 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0 0 0 1px inset;
+    box-shadow:
+        rgba(0, 0, 0, 0.25) 0 0.0625em 0.0625em,
+        rgba(0, 0, 0, 0.25) 0 0.125em 0.5em,
+        rgba(255, 255, 255, 0.1) 0 0 0 1px inset;
 }
 
 /*! Basic Details*/
@@ -48,7 +51,7 @@ main {
     background-color: #8ebefa;
     gap: 1rem;
     width: 100%;
-    & section>div {
+    & section > div {
         display: flex;
         gap: 0.5rem;
         height: 1.2rem;
@@ -108,6 +111,9 @@ p::-webkit-scrollbar-track {
     align-items: center;
     & .links-qty {
         font-weight: bold;
+    }
+    & .links-head {
+        text-align: center;
     }
 }
 
@@ -235,7 +241,9 @@ p::-webkit-scrollbar-track {
     /* Initial state - invisible and scaled down */
     opacity: 0;
     transform: scale(0);
-    transition: opacity 0.4s ease-in-out 0.1s, transform 0.4s ease-in-out 0.1s;
+    transition:
+        opacity 0.4s ease-in-out 0.1s,
+        transform 0.4s ease-in-out 0.1s;
 }
 
 /* Hover effects */
@@ -260,17 +268,20 @@ p::-webkit-scrollbar-track {
     appearance: none;
     border-radius: 4px;
     border-style: none;
-    box-shadow: rgba(0, 0, 0, .2) 0 3px 1px -2px,rgba(0, 0, 0, .14) 0 2px 2px 0,rgba(0, 0, 0, .12) 0 1px 5px 0;
+    box-shadow:
+        rgba(0, 0, 0, 0.2) 0 3px 1px -2px,
+        rgba(0, 0, 0, 0.14) 0 2px 2px 0,
+        rgba(0, 0, 0, 0.12) 0 1px 5px 0;
     box-sizing: border-box;
     color: #fff;
     cursor: pointer;
     display: inline-flex;
-    font-family: Roboto,sans-serif;
-    font-size: .875rem;
+    font-family: Roboto, sans-serif;
+    font-size: 0.875rem;
     font-weight: 500;
     height: 36px;
     justify-content: center;
-    letter-spacing: .0892857em;
+    letter-spacing: 0.0892857em;
     line-height: normal;
     min-width: 64px;
     outline: none;
@@ -281,26 +292,32 @@ p::-webkit-scrollbar-track {
     text-decoration: none;
     text-transform: uppercase;
     white-space: nowrap;
-    transition: box-shadow 280ms cubic-bezier(.4, 0, .2, 1);
+    transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
     vertical-align: middle;
-    will-change: transform,opacity;
-    &>a {
+    will-change: transform, opacity;
+    & > a {
         color: inherit;
         text-decoration: inherit;
     }
 }
 
 .ctrl-btn:hover {
-    box-shadow: rgba(0, 0, 0, .2) 0 2px 4px -1px, rgba(0, 0, 0, .14) 0 4px 5px 0, rgba(0, 0, 0, .12) 0 1px 10px 0;
+    box-shadow:
+        rgba(0, 0, 0, 0.2) 0 2px 4px -1px,
+        rgba(0, 0, 0, 0.14) 0 4px 5px 0,
+        rgba(0, 0, 0, 0.12) 0 1px 10px 0;
 }
 
 .ctrl-btn:disabled {
-    background-color: rgba(0, 0, 0, .12);
-    box-shadow: rgba(0, 0, 0, .2) 0 0 0 0, rgba(0, 0, 0, .14) 0 0 0 0, rgba(0, 0, 0, .12) 0 0 0 0;
-    color: rgba(0, 0, 0, .37);
+    background-color: rgba(0, 0, 0, 0.12);
+    box-shadow:
+        rgba(0, 0, 0, 0.2) 0 0 0 0,
+        rgba(0, 0, 0, 0.14) 0 0 0 0,
+        rgba(0, 0, 0, 0.12) 0 0 0 0;
+    color: rgba(0, 0, 0, 0.37);
     cursor: default;
     pointer-events: none;
 }
@@ -310,10 +327,68 @@ p::-webkit-scrollbar-track {
 }
 
 .ctrl-btn:focus {
-    box-shadow: rgba(0, 0, 0, .2) 0 2px 4px -1px, rgba(0, 0, 0, .14) 0 4px 5px 0, rgba(0, 0, 0, .12) 0 1px 10px 0;
+    box-shadow:
+        rgba(0, 0, 0, 0.2) 0 2px 4px -1px,
+        rgba(0, 0, 0, 0.14) 0 4px 5px 0,
+        rgba(0, 0, 0, 0.12) 0 1px 10px 0;
 }
 
 .ctrl-btn:active {
-    box-shadow: rgba(0, 0, 0, .2) 0 5px 5px -3px, rgba(0, 0, 0, .14) 0 8px 10px 1px, rgba(0, 0, 0, .12) 0 3px 14px 2px;
+    box-shadow:
+        rgba(0, 0, 0, 0.2) 0 5px 5px -3px,
+        rgba(0, 0, 0, 0.14) 0 8px 10px 1px,
+        rgba(0, 0, 0, 0.12) 0 3px 14px 2px;
     filter: brightness(150%);
+}
+
+/*! MEDIA QUERIES */
+
+@media (max-width: 500px) {
+    .profile-page {
+        padding: 1rem 0;
+        width: 95%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-card {
+        width: 98%;
+    }
+
+    .basic-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    /*! Email Verify*/
+    .email-verify {
+        gap: 0.5rem;
+    }
+    .verify-head {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .ver-status {
+        font-size: 0.9rem;
+        color: white;
+        border-radius: 1rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    /*!-------- VERIFY BUTTON ------------*/
+    /*!/* From Uiverse.io by adamgiebl */
+    .verify {
+        transform: scale(0.9);
+    }
+
+    /*! Controls */
+    .controls {
+        width: 95%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 0;
+    }
 }

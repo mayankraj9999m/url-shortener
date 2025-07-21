@@ -124,7 +124,7 @@ export const createTokens = (userInfo) => {
 }
 
 export const setCookies = (req, res, accessToken, refreshToken) => {
-    const baseConfig = { httpOnly: true };
+    const baseConfig = { httpOnly: true, secure: true };
     res.cookie("access_token", accessToken, {
         ...baseConfig, maxAge: ACCESS_TOKEN_EXPIRY
     })

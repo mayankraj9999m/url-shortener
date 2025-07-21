@@ -151,7 +151,7 @@ url-shortener/
    npm start
    ```
 
-The application will be available at `http://localhost:3000`
+<b>LIVE LINK : </b> The application is available at `http://mayankrajtools.me`
 
 ## API Endpoints
 

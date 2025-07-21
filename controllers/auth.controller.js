@@ -326,7 +326,7 @@ export const resendVerificationLink = async (req, res) => {
         code: randomToken,
         link: verifyEmailLink
     }
-    const htmlOutput = await readEmailFile("reset_password", payload);
+    const htmlOutput = await readEmailFile("verify_email", payload);
 
     sendEmail({
         to: req.user.email,
