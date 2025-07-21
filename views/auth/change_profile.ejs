@@ -15,7 +15,7 @@
         <main>
             <div id="change-profile-card">
                 <h1>Change Profile</h1>
-                <div id="instuctions">
+                <div id="instructions">
                     <p><strong>You can change name, profile photo</strong></p>
                 </div>
                 <form id="profile-form">
@@ -54,12 +54,49 @@
             </div>
         </main>
         <script>
-            // file input : get name of file selected
+            // file input : get name of file selected, and file preview
+            let previousObjectUrl = null;
             function updateFileName(input) {
-                const fileName = input.files.length > 0 ? input.files[0].name : 'No file chosen';
+                const file = input.files[0];
+                const fileName = file ? file.name : 'No file chosen';
                 document.getElementById('fileName').textContent = fileName;
+
+                // Show preview if it's an image
+                if (file && file.type.startsWith("image/")) {
+                    const previewImg = document.getElementById("avatar-preview-img");
+
+                    // Revoke old object URL if exists
+                    if (previousObjectUrl) {
+                        URL.revokeObjectURL(previousObjectUrl);
+                    }
+
+                    // Set new preview
+                    previousObjectUrl = URL.createObjectURL(file);
+                    
+                    previewImg.src = previousObjectUrl;
+                }
             }
 
+            //--------------- FILE REMOVE -------------------
+            // Remove image preview and clear file input
+            document.getElementById('remove-avatar')?.addEventListener('click', function () {
+                const previewImg = document.getElementById("avatar-preview-img");
+                const fileInput = document.getElementById("avatar");
+                const fileName = document.getElementById("fileName");
+
+                // Revoke any existing preview URL
+                if (previousObjectUrl) {
+                    URL.revokeObjectURL(previousObjectUrl);
+                    previousObjectUrl = null;
+                }
+
+                // Reset preview to default "no-image" or blank
+                previewImg.src = "/images/no-image.svg"; // or your default placeholder
+                fileInput.value = ""; // clears the file input
+                fileName.textContent = "No file chosen";
+            });
+
+            // change request made to server using fetch api
             const form = document.getElementById("profile-form");
 
             // getting credentials

@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 import { ACCESS_TOKEN_EXPIRY, MILLISECONDS_PER_SECOND, REFRESH_TOKEN_EXPIRY } from "../config/constants.js";
 import crypto from "crypto";
 import { verifyEmailSchema } from "../validators/auth_validator.js";
+import fs from "fs";
+import path from "path";
 
 export const getUserByEmail = async (email) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
@@ -213,6 +215,13 @@ export const changeNameInMySQL = async (name, id) => {
 };
 
 export const changeProfileUrlInMySql = async (data) => {
+    const [userDetail] = await db.select().from(usersTable).where(eq(data.id, usersTable.id));
+    
+    if (userDetail.avatarUrl) {
+        const filePath = path.join(import.meta.dirname, "..", "public", `${userDetail.avatarUrl}`);
+        
+        fs.unlinkSync(filePath);
+    }
     return db.update(usersTable).set(data).where(eq(usersTable.id, data.id));
 }
 

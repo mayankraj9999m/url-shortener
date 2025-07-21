@@ -238,12 +238,12 @@ export const postChangeProfile = async (req, res) => {
             return res.status(401).json({ success: false, error: error.errors[0].message });
         }
 
-        const fileUrl = req.file ? `uploads/avatar/${req.file.filename}` : undefined;
+        const fileUrl = req.file ? `uploads/avatar/${req.file.filename}` : null;
 
         await changeProfileUrlInMySql({
             id: req.user.id,
             name: data.name,
-            avatarUrl: fileUrl
+            avatarUrl: fileUrl,
         });
 
         const userInfo = {
