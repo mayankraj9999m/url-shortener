@@ -1,6 +1,7 @@
 # URL Shortener
 
 A modern URL shortener application built with Node.js, Express.js, and MySQL, featuring user authentication, social login, and a responsive web interface.
+<img src="https://github.com/user-attachments/assets/4e10f539-4701-46d3-b97a-df13b606a6af" width="179" alt="download" />
 
 ## Features
 
