@@ -5,14 +5,14 @@ import path from 'path';
 import requestIp from "request-ip";
 import session from "express-session";
 
-import {shortenerRoutes} from "./routes/shortener.routes.js";
-import {authRoutes} from "./routes/auth.routes.js";
-import {verifyAuthentication} from "./middlewares/verify.middleware.js";
+import { shortenerRoutes } from "./routes/shortener.routes.js";
+import { authRoutes } from "./routes/auth.routes.js";
+import { verifyAuthentication } from "./middlewares/verify.middleware.js";
 
 const app = express();
 
 app.use(express.static(path.join(import.meta.dirname, "public")));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 // Lecture 53 : Template Engines (ejs)
 app.set("view engine", "ejs");

@@ -286,3 +286,15 @@ main {
     border-left: 0.2rem solid darkred;
     width: 100%;
 }
+
+@media (max-width: 500px) {
+    .file-upload-wrapper {
+        flex-direction: column;
+    }
+    .file-name {
+        font-size: 1rem;
+    }
+    .file-upload-wrapper span::-webkit-scrollbar {
+        height: 0px; /* Make it more visible for testing */
+    }
+}
