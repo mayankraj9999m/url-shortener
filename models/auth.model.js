@@ -124,7 +124,8 @@ export const createTokens = (userInfo) => {
 }
 
 export const setCookies = (req, res, accessToken, refreshToken) => {
-    const baseConfig = { httpOnly: true, secure: true };
+    // const baseConfig = { httpOnly: true, secure: true };
+    const baseConfig = { httpOnly: true };
     res.cookie("access_token", accessToken, {
         ...baseConfig, maxAge: ACCESS_TOKEN_EXPIRY
     })
@@ -135,6 +136,16 @@ export const setCookies = (req, res, accessToken, refreshToken) => {
 
 export const getAllShortLinksByUserId = async (userId) => {
     return db.select().from(short_link).where(eq(short_link.userId, userId));
+}
+
+export const countTotalClicksPerUser = async (userId) => {
+    const data = await db.select().from(short_link).where(eq(short_link.userId, userId));
+    if (data && data.length) {
+        return data.reduce((acc, e) => acc += e.clicks, 0);
+    }
+    else {
+        return 0;
+    }
 }
 
 export const generateRandomToken = (digit = 8) => {

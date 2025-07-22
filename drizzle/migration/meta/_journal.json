@@ -64,6 +64,13 @@
       "when": 1752852012200,
       "tag": "0008_oval_sauron",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1753172546469,
+      "tag": "0009_panoramic_archangel",
+      "breakpoints": true
     }
   ]
 }

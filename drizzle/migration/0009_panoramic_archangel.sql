@@ -1,0 +1,1 @@
+ALTER TABLE `short_links_table` ADD `clicks` int DEFAULT 0;

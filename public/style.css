@@ -94,7 +94,6 @@ button:focus {
 }
 
 #shortened-urls li {
-    max-width: 100%;
     margin-right: 4px;
     border-radius: 5px;
     padding: 10px;
@@ -116,8 +115,10 @@ button:focus {
     }
 
     & .controls {
+        width: 20%;
         display: flex;
-        gap: 2px;
+        gap: 0.8rem;
+        justify-content: flex-end;
     }
 }
 
@@ -135,7 +136,7 @@ button:focus {
     /*align-items: center;*/
     gap: 0.5rem;
     /*overflow-x: auto;*/
-    width: 80%;
+    width: 75%;
     /*min-width: 40%;*/
     /*max-width: 40%;*/
     flex-shrink: 0;
@@ -184,6 +185,19 @@ button:focus {
     font-size: 1.1rem;
 }
 
+.count-links {
+    width: 30px;
+    height: 30px;
+    padding: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #befbcf;
+    border: 2px solid #31a55e;
+    border-radius: 0.2rem;
+    font-weight: 700;
+}
+
 /* Chrome, Edge, and Safari */
 ul::-webkit-scrollbar {
     width: 8px; /* Make it more visible for testing */
@@ -217,7 +231,7 @@ a::-webkit-scrollbar-track {
     border-radius: 4px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .container {
         width: 95%;
     }
@@ -227,6 +241,15 @@ a::-webkit-scrollbar-track {
             width: 30px;
             height: 30px;
         }
+        & .controls {
+            width: 40%;
+            display: flex;
+            gap: 0.5rem;
+        }
+    }
+
+    #shortened-urls li .link-ctr {
+        width: 60%;
     }
 
     .short-code-link {

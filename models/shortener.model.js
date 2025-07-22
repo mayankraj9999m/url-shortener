@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "../config/db.js";
 import { short_link } from "../drizzle/schema.js";
 import { logoutUser } from "../controllers/auth.controller.js";
@@ -72,3 +72,7 @@ export const editShortLinkDatabase = async (id, url, shortCode, userId) => {
         )
     )
 };
+
+export const incrementClickCount = async (shortCode) => {
+    return db.update(short_link).set({ clicks: sql`${short_link.clicks} + 1` }).where(eq(short_link.shortCode, shortCode));
+}

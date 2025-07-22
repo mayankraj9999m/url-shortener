@@ -39,7 +39,7 @@
             <h2>Shortened URLs</h2>
             <ul id="shortened-urls">
                 <% if(links.length>0) { %>
-                    <% links.map(({id, shortCode, url}) => { %>
+                    <% links.map(({id, shortCode, url, clicks}) => { %>
                         <li data-id="<%= id %>">
                             <div class="link-ctr">
                                 <div class="link">
@@ -49,6 +49,7 @@
                                 <p><%= url %></p>
                             </div>
                             <div class="controls">
+                                <span class="count-links"><%= clicks %></span>
                                 <img src="./Images/edit.svg" alt="edit" class="edit" data-id="edit"/>
                                 <img src="./Images/delete.svg" alt="cancel" data-id="delete"/>
                             </div>

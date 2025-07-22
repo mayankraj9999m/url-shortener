@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { deleteLinks, Devs, editShortLinkDatabase, loadLinks, saveLinks } from '../models/shortener.model.js';
+import { deleteLinks, Devs, editShortLinkDatabase, incrementClickCount, loadLinks, saveLinks } from '../models/shortener.model.js';
 import path from 'path';
 import { shortCodeSchema, shortenerSearchParamsSchema } from "../validators/shortcode-validator.js";
 import z from "zod";
@@ -88,6 +88,7 @@ export const redirectToShortLink = async (req, res) => {
         const { shortLinks } = await loadLinks({ userId: req.user.id, shortCode: shortCode });
         const links = shortLinks?.[0] || null;
         if (!links) return res.status(404).sendFile(path.join(import.meta.dirname, '..', 'views', '404.html'));
+        await incrementClickCount(links.shortCode);
         console.log(`Redirected to : ${links.shortCode}`);
         return res.redirect(302, links.url);
     } catch (error) {

@@ -2,7 +2,7 @@ import {
     changeNameInMySQL,
     changePasswordInMySql,
     changeProfileUrlInMySql,
-    comparePassword, createEmailVerifyLink,
+    comparePassword, countTotalClicksPerUser, createEmailVerifyLink,
     createSession, createTokens,
     createUser, createUserWithOauth, deleteResetTokens, findUserById, generateRandomToken, getAllShortLinksByUserId,
     getUserByEmail,
@@ -195,6 +195,8 @@ export const getProfilePage = async (req, res) => {
     const options = { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' };
     const formattedDate = new Date(user.createdAt).toLocaleDateString('en-GB', options);
 
+    const totalClicks = await countTotalClicksPerUser(user.id);
+
     res.render("auth/profile.ejs", {
         user: {
             id: user.id,
@@ -204,7 +206,8 @@ export const getProfilePage = async (req, res) => {
             links: userShortLinks,
             isEmailVerified: req.user.isEmailVerified,
             onlineSignIn: !user.password,
-            avatarUrl: user.avatarUrl
+            avatarUrl: user.avatarUrl,
+            totalClicks
         }
     });
 };

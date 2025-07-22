@@ -34,6 +34,7 @@ export const short_link = mysqlTable('short_links_table', {
     id: int("serial_no").autoincrement().primaryKey(),
     url: varchar("url", { length: 255 }).notNull(),
     shortCode: varchar("short_code", { length: 20 }).notNull().unique(),
+    clicks: int().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: int("user_id")
