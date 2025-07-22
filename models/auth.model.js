@@ -217,7 +217,7 @@ export const changeNameInMySQL = async (name, id) => {
 export const changeProfileUrlInMySql = async (data) => {
     const [userDetail] = await db.select().from(usersTable).where(eq(data.id, usersTable.id));
     
-    if (userDetail.avatarUrl) {
+    if (userDetail.avatarUrl && userDetail.avatarUrl.startsWith("public/")) {
         const filePath = path.join(import.meta.dirname, "..", "public", `${userDetail.avatarUrl}`);
         
         fs.unlinkSync(filePath);
