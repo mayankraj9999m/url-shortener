@@ -13,6 +13,13 @@ A modern URL shortener application built with Node.js, Express.js, and MySQL, fe
 - Delete unwanted links
 - Pagination for large link collections
 
+### 📱 QR Code Generation
+- Generate QR codes for any URL or text
+- Returns base64 encoded data URLs
+- High error correction level for better readability
+- JSON response format for easy integration
+- Simple and lightweight implementation
+
 ### 🔐 Authentication & User Management
 - **Local Authentication**: Register/login with email and password
 - **Social Login**: Sign in with Google or GitHub OAuth
@@ -57,6 +64,7 @@ A modern URL shortener application built with Node.js, Express.js, and MySQL, fe
 - **File Uploads**: Multer
 - **Environment Management**: dotenv
 - **Development**: Auto-reload with development scripts
+- **QR Code Generation**: QRCode library for generating QR codes
 
 ## Project Structure
 
@@ -180,6 +188,12 @@ url-shortener/
 - `DELETE /delete/:id` - Delete short URL
 - `GET /dev` - Developers showcase page
 
+### QR Code Generation Routes
+- `GET /generate-qr` - Generate QR code and return as base64 data URL
+  - **Parameters**:
+    - `text` (required) - Content to encode in QR code
+  - **Response**: JSON object with success status and base64 QR code data URL
+
 ## Database Schema
 
 The application uses the following main tables:
@@ -221,6 +235,46 @@ The application uses the following main tables:
 - **MJML Templates**: Professional email templates
 - **Verification**: Email verification for new accounts
 - **Password Reset**: Secure password reset via email
+
+## QR Code API Usage
+
+### Basic QR Code Generation
+```bash
+GET /generate-qr?text=Hello%20World
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbM..."
+}
+```
+
+### Usage in Frontend
+```javascript
+// Fetch QR code
+fetch('/generate-qr?text=Hello%20World')
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Use the base64 data URL directly in an img tag
+      document.getElementById('qr-image').src = data.qrCode;
+    }
+  });
+```
+
+### Parameters
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `text` | string | required | Content to encode in QR code |
+
+### Response Format
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Indicates if QR generation was successful |
+| `qrCode` | string | Base64 encoded data URL of the QR code image |
+| `error` | string | Error message (only present when success is false) |
 
 ## Security Considerations
 
