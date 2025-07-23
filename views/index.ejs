@@ -50,6 +50,7 @@
                             </div>
                             <div class="controls">
                                 <span class="count-links"><%= clicks %></span>
+                                <img src="./Images/qr-code.png" alt="qr-code" data-id="qr">
                                 <img src="./Images/edit.svg" alt="edit" class="edit" data-id="edit"/>
                                 <img src="./Images/delete.svg" alt="cancel" data-id="delete"/>
                             </div>
@@ -68,6 +69,18 @@
                                             </div>
                                             <button type="submit">Update</button>
                                         </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-bg">
+                                <div class="filter-popup">
+                                    <div class="qr-code" style="text-align: center;">
+                                        <header>
+                                            <label style="font-weight: bold; font-size: 1.5rem">QR Code</label>
+                                            <label style="font-size: 1.2rem"><%= host %>/<%= shortCode %></label>
+                                        </header>
+                                        <img alt="qr-code" class="qr-preview" data-code="<%= host %>/<%= shortCode %>">
+                                        <label style="font-size: 1rem">Scan using QR Code Scanner</label>
                                     </div>
                                 </div>
                             </div>
@@ -165,18 +178,14 @@
                 const filter = li.querySelector(".filter");
                 filterBg.classList.remove("inactive");
                 filterPopUp.classList.remove("inactive");
-                filter.classList.remove("inactive");
                 filterBg.classList.add("active");
                 filterPopUp.classList.add("active");
-                filter.classList.add("active");
                 filterBg.addEventListener("click", (e) => {
                     if (e.target["classList"][0] === "filter-bg") {
                         filterBg.classList.remove("active");
                         filterPopUp.classList.remove("active");
                         filterBg.classList.add("inactive");
                         filterPopUp.classList.add("inactive");
-                        filter.classList.add("inactive");
-                        filter.classList.remove("active");
                     }
                 });
                 const updateForm = li.querySelector('[data-id="update-box"]');
@@ -233,6 +242,44 @@
                 console.error(error);
             }
         }
+
+        //! create qr code
+        const gen_qr_icons = document.querySelectorAll("[data-id='qr']"); // AllQR Codes buttons
+        gen_qr_icons.forEach((img, index) => {
+            img.addEventListener('click', async () => {
+                const li = img.closest('li');
+                const qrcode_img = li.querySelector(".qr-preview");
+                // const ID = li.dataset.id;
+                const data_code = qrcode_img.getAttribute('data-code');
+                const filterBg = li.querySelectorAll(".filter-bg")[1];
+                const filterPopUp = li.querySelectorAll(".filter-popup")[1];
+                const qrcode = li.querySelector(".qr-code");
+                filterBg.classList.remove("inactive");
+                filterPopUp.classList.remove("inactive");
+                filterBg.classList.add("active");
+                filterPopUp.classList.add("active");
+                if (qrcode_img.src) {
+                    return; // Eliminates unecessary api calls
+                }
+                // fetch api to generate qr codes
+                const res = await fetch(`/generate?text=${data_code}`, {
+                    method : "GET",
+                    headers: {'Accept': 'application/json'} // Ask for JSON response
+                });
+                if (res.ok) {
+                    data = await res.json();
+                    qrcode_img.src = data.qrCode;
+                };
+                filterBg.addEventListener("click", (e) => {
+                    if (e.target["classList"][0] === "filter-bg") {
+                        filterBg.classList.remove("active");
+                        filterPopUp.classList.remove("active");
+                        filterBg.classList.add("inactive");
+                        filterPopUp.classList.add("inactive");
+                    }
+                });
+            })
+        })
 
         //! Setting height of list
         // const li = document.querySelectorAll("#shortened-urls li");

@@ -4,6 +4,9 @@ import path from 'path';
 import { shortCodeSchema, shortenerSearchParamsSchema } from "../validators/shortcode-validator.js";
 import z from "zod";
 
+import QRCode from 'qrcode';
+import fs from 'fs';
+
 export const getShortenerPage = async (req, res) => {
     if (!req.user) return res.redirect("/login");
     try {
@@ -139,3 +142,30 @@ export const editShortLink = async (req, res) => {
         return res.status(500).sendFile(path.join(import.meta.dirname, '..', 'views', 'server_error.html'));
     }
 }
+
+export const generateQR = async (req, res) => {
+    const { text } = req.query;
+    try {
+        //! Generate QR object for internal properties
+        // const qr = QRCode.create(text, { errorCorrectionLevel: 'H' });
+
+        // console.log('Size:', qr.modules.size);           // matrix size
+        // console.log('Version:', qr.version);             // QR version
+        // console.log('Mask Pattern:', qr.maskPattern);    // mask used
+        // console.log('Segments:', qr.segments);           // data segments
+
+        // Generate base64 image
+        const dataUrl = await QRCode.toDataURL(text, { errorCorrectionLevel: 'H' });
+        console.log('✅ QR Code Data URL:\n', dataUrl);
+
+        // Optional: save image to file
+        // const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+        // fs.writeFileSync('qr.png', base64Data, 'base64');
+        // console.log('✅ Saved as qr.png');
+
+        res.status(200).json({ success: true, qrCode: dataUrl });
+    } catch (err) {
+        console.error('❌ Error generating QR:', err);
+        res.status(500).send({ success: false, error: err.message });
+    }
+};

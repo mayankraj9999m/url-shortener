@@ -5,7 +5,8 @@ import {
     redirectToShortLink,
     getEJSDeveloperPage,
     deleteShortCode,
-    editShortLink
+    editShortLink,
+    generateQR
 } from '../controllers/postshortener.controller.js';
 
 // Lecture 52 : Express Router
@@ -16,6 +17,8 @@ router.get("/", getShortenerPage);
 router.post("/", postURLShortener);
 
 router.get("/dev", getEJSDeveloperPage);
+
+router.get('/generate', generateQR);
 
 router.get("/:shortCode", redirectToShortLink);
 

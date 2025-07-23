@@ -198,6 +198,27 @@ button:focus {
     font-weight: 700;
 }
 
+/*QR Code*/
+.qr-code {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    margin: 15px;
+    background-color: #f9fafb;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.4rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    /* transform-origin: top left; */
+    /*transform: scale(0.8);*/
+    &>img {
+        width: 10rem;
+        background-color: rgb(238, 238, 238);
+    }
+}
+
 /* Chrome, Edge, and Safari */
 ul::-webkit-scrollbar {
     width: 8px; /* Make it more visible for testing */
@@ -287,6 +308,7 @@ a::-webkit-scrollbar-track {
     transition: opacity 0.3s ease;
 }
 
+/*? for filter background */
 .active {
     opacity: 1;
     pointer-events: all;
@@ -302,22 +324,19 @@ a::-webkit-scrollbar-track {
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) scale(0.7);
-    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 1;
     /* transform-origin: top left; */
     transition:
         top 0.3s ease,
-        opacity 0.3s ease,
         transform 0.3s ease;
     &.active {
         top: 50%;
-        opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
     &.inactive {
         top: 50%;
-        transform: translate(-50%, -50%) scale(0.7);
-        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
     }
 }
 
