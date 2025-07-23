@@ -75,10 +75,10 @@
                             <div class="filter-bg">
                                 <div class="filter-popup">
                                     <div class="qr-code" style="text-align: center;">
-                                        <header>
-                                            <label style="font-weight: bold; font-size: 1.5rem">QR Code</label>
-                                            <label style="font-size: 1.2rem"><%= host %>/<%= shortCode %></label>
-                                        </header>
+                                        <div>
+                                            <p style="font-weight: bold; font-size: 1.5rem">QR Code</p>
+                                            <p class="url-qr"><%= host %>/<%= shortCode %></p>
+                                        </div>
                                         <img alt="qr-code" class="qr-preview" data-code="<%= host %>/<%= shortCode %>">
                                         <label style="font-size: 1rem">Scan using QR Code Scanner</label>
                                     </div>
