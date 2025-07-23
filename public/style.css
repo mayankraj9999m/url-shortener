@@ -206,14 +206,14 @@ button:focus {
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    margin: 15px;
+    /* margin: 15px; */
     background-color: #f9fafb;
     border: 1px solid #e2e8f0;
     border-radius: 0.4rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     /* transform-origin: top left; */
     /*transform: scale(0.8);*/
-    &>img {
+    & > img {
         width: 10rem;
         background-color: rgb(238, 238, 238);
     }
@@ -252,6 +252,7 @@ a::-webkit-scrollbar-track {
     border-radius: 4px;
 }
 
+/* Most mobile phones and tablets covered */
 @media (max-width: 650px) {
     .container {
         width: 95%;
@@ -263,14 +264,16 @@ a::-webkit-scrollbar-track {
             height: 30px;
         }
         & .controls {
-            width: 40%;
+            width: fit-content;
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            transform: scale(0.8);
+            transform-origin: right;
         }
     }
 
     #shortened-urls li .link-ctr {
-        width: 60%;
+        width: 55%;
     }
 
     .short-code-link {
@@ -280,6 +283,26 @@ a::-webkit-scrollbar-track {
     #shortened-urls p::-webkit-scrollbar,
     a::-webkit-scrollbar {
         height: 0; /* Make it more visible for testing */
+    }
+}
+
+@media (max-width: 380px) {
+    .container {
+        width: 96%;
+    }
+
+    #shortened-urls li {
+        & .controls {
+            width: 50%;
+            display: flex;
+            gap: 0.4rem;
+            transform: scale(0.8);
+            transform-origin: right;
+        }
+    }
+
+    #shortened-urls li .link-ctr {
+        width: 50%;
     }
 }
 
@@ -327,6 +350,8 @@ a::-webkit-scrollbar-track {
     transform: translate(-50%, -50%) scale(0.9);
     opacity: 1;
     /* transform-origin: top left; */
+    display: flex;
+    justify-content: center;
     transition:
         top 0.3s ease,
         transform 0.3s ease;
