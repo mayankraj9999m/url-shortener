@@ -234,6 +234,15 @@ export const postChangeProfile = async (req, res) => {
         return await logoutUser(req, res);
     }
 
+    // Check if a file was uploaded and if it exceeds the limit
+    // (If using multer limits, req.file might be undefined or you'll catch a multer error)
+    if (req.file && req.file.size > 5 * 1024 * 1024) { 
+        return res.status(401).json({ 
+            success: false, 
+            error: "Image size should not exceed 2MB" 
+        });
+    }
+
     try {
         //! Validating name using Zod
         const { data, error } = changeNameSchema.safeParse(req.body);

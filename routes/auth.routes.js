@@ -5,7 +5,7 @@ import multer from "multer";
 
 const router = express.Router();
 
-router.use(express.static(path.join(import.meta.dirname, "..", "auth_styles")));
+// router.use(express.static(path.join(import.meta.dirname, "..", "auth_styles")));
 router.use(express.json()); // Parse the JSON incoming from frontend
 
 //! Login and register page

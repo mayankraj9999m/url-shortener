@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change Profile</title>
     <meta name="referrer" content="no-referrer">
-    <link rel="icon" href="/Images/download.png" type="image/png">
+    <link rel="icon" href="/images/download.png" type="image/png">
     <link rel="stylesheet" href="/change_profile.css">
 </head>
 
@@ -17,6 +17,7 @@
                 <h1>Change Profile</h1>
                 <div id="instructions">
                     <p><strong>You can change name, profile photo</strong></p>
+                    <p><strong>Upto 5MB image size allowed</strong></p>
                 </div>
                 <form id="profile-form">
                     <div class="avatar-upload">
@@ -58,6 +59,15 @@
             let previousObjectUrl = null;
             function updateFileName(input) {
                 const file = input.files[0];
+                const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
+
+                // if (file && file.size > MAX_SIZE) {
+                //     alert("File is too large! Please upload an image smaller than 5MB.");
+                //     input.value = ""; // Clear the input
+                //     document.getElementById('fileName').textContent = 'No file chosen';
+                //     return;
+                // }
+
                 const fileName = file ? file.name : 'No file chosen';
                 document.getElementById('fileName').textContent = fileName;
 
@@ -130,7 +140,7 @@
                     const errorStatus = response.statusText;
                     const errorMessage = data.error;
 
-                    if (response.status === 401) {
+                    if (response.status === 401 || response.status === 413) {
                         errorContainer.innerHTML = `${errorMessage}`;
                         // Append the alert above the login button
                         submit_btn.before(errorContainer);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./Images/download.png" type="image/png">
+    <link rel="icon" href="./images/download.png" type="image/png">
     <title>URL Shortener App</title>
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -17,7 +17,7 @@
     <main>
         <div class="container">
             <div class="status" style="background-color: <%= (username ? '#d6fcc0' : '#fcc0c0') %>">
-                <img src="./Images/<%= (username ? "logged" : "notlogged") %>.svg" alt=`<%= (username ? "logged" : "notlogged") %>`/>
+                <img src="./images/<%= (username ? "logged" : "notlogged") %>.svg" alt=`<%= (username ? "logged" : "notlogged") %>`/>
                 <p>You are <%= (username ? "" : "not ") %>logged in</p>
             </div>
             <h1>URL Shortener App</h1>
@@ -43,16 +43,16 @@
                         <li data-id="<%= id %>">
                             <div class="link-ctr">
                                 <div class="link">
-                                    <img src="./Images/link.svg" alt="link"/>
+                                    <img src="./images/link.svg" alt="link"/>
                                     <a href="/<%= shortCode %>" target="_blank" class="short-code-link"><%= host %>/<%= shortCode %></a>
                                 </div>
                                 <p><%= url %></p>
                             </div>
                             <div class="controls">
                                 <span class="count-links"><%= clicks %></span>
-                                <img src="./Images/qr-code.png" alt="qr-code" data-id="qr">
-                                <img src="./Images/edit.svg" alt="edit" class="edit" data-id="edit"/>
-                                <img src="./Images/delete.svg" alt="cancel" data-id="delete"/>
+                                <img src="./images/qr-code.png" alt="qr-code" data-id="qr">
+                                <img src="./images/edit.svg" alt="edit" class="edit" data-id="edit"/>
+                                <img src="./images/delete.svg" alt="cancel" data-id="delete"/>
                             </div>
                             <div class="filter-bg">
                                 <div class="filter-popup">

@@ -8,6 +8,7 @@ import session from "express-session";
 import { shortenerRoutes } from "./routes/shortener.routes.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { verifyAuthentication } from "./middlewares/verify.middleware.js";
+import multer from "multer";
 
 const app = express();
 
@@ -50,6 +51,18 @@ app.use(shortenerRoutes);
 // Error page (when client visits an undefined route)
 app.use((req, res) => {
     res.status(404).sendFile(path.join(import.meta.dirname, 'views', '404.html'));
+});
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({
+                success: false,
+                error: "Image is too large. Maximum limit is 5MB."
+            });
+        }
+    }
+    next(err);
 });
 
 //*Listening to server
